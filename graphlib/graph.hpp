@@ -4,6 +4,7 @@
 #include <vector>
 #include <stdexcept>
 #include <unordered_set>
+#include <iostream>
 #include "vertex.hpp"
 #include "edge.hpp"
 
@@ -52,10 +53,9 @@ namespace csce {
             if (this->getEdgeCount() != other.getEdgeCount()) {
                 return false;
             }
-            
+
             // dumb search (implement sorted comparison later)
-            auto verticies = this->getVerticies();
-            for (auto vertex = verticies.begin(); vertex != verticies.end(); vertex++) {
+            for (auto vertex = _verticies.begin(); vertex != _verticies.end(); vertex++) {
                 if (!other.contains(*vertex)) {
                     return false;
                 }

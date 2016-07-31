@@ -10,6 +10,11 @@ Graph &Graph::add(size_t id) {
 }
 
 Graph &Graph::add(const Vertex& vertex) {
+    auto it = this->_findVertex(vertex);
+    if (it != this->_verticies.end()) {
+        return *this;
+    }
+
     this->_verticies.push_back(vertex);
     return *this;
 }
@@ -27,13 +32,23 @@ Graph &Graph::add(const Edge& edge) {
         return *this;
     }
 
-    this->_verticies.push_back(edge.getU());
-    auto u = this->_verticies.back();
-    this->_verticies.push_back(edge.getV());
-    auto v = this->_verticies.back();
+    auto itU = this->_findVertex(edge.getU());
+    if (itU != this->_verticies.end()) {
+        itU->addNeighbor(edge.getV());
+    } else {
+        auto u = edge.getU();
+        u.addNeighbor(edge.getV());
+        this->_verticies.push_back(u);
+    }
 
-    u.addNeighbor(v);
-    v.addNeighbor(u);
+    auto itV = this->_findVertex(edge.getV());
+    if (itV != this->_verticies.end()) {
+        itV->addNeighbor(edge.getU());
+    } else {
+        auto v = edge.getV();
+        v.addNeighbor(edge.getU());
+        this->_verticies.push_back(v);
+    }
 
     return *this;
 }
@@ -116,6 +131,8 @@ vector<Edge> Graph::getEdges() const {
             edges.push_back(e);
         }
     }
+    
+    return edges;
 }
 
 Vertex Graph::getVertex(size_t id) const {
