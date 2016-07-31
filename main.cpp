@@ -15,21 +15,21 @@ int main(int argc, char **argv)
         .add(7,6).add(7,8)
         .add(8,6).add(8,7);
 
-    vector<Graph> solution;
+    vector<csce::Graph> solution;
     
-    Graph comp1;
+    csce::Graph comp1;
     comp1.add(1,2).add(2,3).add(3,1);
     solution.push_back(comp1);
     
-    Graph comp2;
+    csce::Graph comp2;
     comp2.add(1,4).add(4,5).add(5,0).add(0,1);
     solution.push_back(comp2);
 
-    Graph comp3;
+    csce::Graph comp3;
     comp3.add(0,6);
     solution.push_back(comp3);
 
-    Graph comp4;
+    csce::Graph comp4;
     comp4.add(6,8).add(8,7).add(7,6);
     solution.push_back(comp4);
 
