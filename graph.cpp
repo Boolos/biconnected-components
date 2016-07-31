@@ -1,247 +1,231 @@
-#include "graph.h"
-#include <queue>
-#include <fstream>
-#include <stdexcept>
-#include <map>
-using std::vector;
-using std::set;
-using std::pair;
-using std::make_pair;
-using std::queue;
-using std::ifstream;
-using std::invalid_argument;
-using std::map;
+#include "graph.hpp"
 
-// static
-Graph Graph::BFSTreeRooted(const Graph &g, size_t root, set< pair<size_t, size_t> > *nonTreeEdges)
-{
-	Graph t(g.V());
-	t.m_parent.resize(g.V());
-	t.m_level.resize(g.V());
-	t.m_isTree = true;
-	
-	vector<bool> discovered(g.V(), false);
-	vector<bool> visited(g.V(), false);
-	
-	discovered[root] = true;
-	t.m_parent[root] = root;
-	t.m_level[root] = 0;
-	
-	queue<size_t> Q;
-	Q.push(root);
-	while(!Q.empty())
-	{
-		size_t u = Q.front();
-		Q.pop();
-		
-		if(visited[u])
-			continue;
-		visited[u] = true;
-		
-		for(set<size_t>::const_iterator j = g.adj(u).begin(); j != g.adj(u).end(); ++j)
-		{
-			if(!visited[*j])
-			{
-				if(!discovered[*j])
-				{
-					discovered[*j] = true;
-					t.m_parent[*j] = u;
-					t.m_level[*j] = t.m_level[u] + 1;
-					t.m_adj[u].insert(*j);
-					t.m_adj[*j].insert(u);
-					Q.push(*j);
-				}
-				else if(nonTreeEdges)
-				{
-					if(u < *j)
-						nonTreeEdges->insert(make_pair(u, *j));
-					else
-						nonTreeEdges->insert(make_pair(*j, u));
-				}
-			}
-		}
-	}
-	
-	return t;
+using namespace csce;
+using namespace std;
+
+Graph::Graph() { }
+
+Graph &Graph::add(size_t id) {
+    return this->add(Vertex(id));
 }
 
-// static
-Graph Graph::BFSTree(const Graph &g, vector< vector<size_t> > *components, set< pair<size_t, size_t> > *nonTreeEdges)
-{
-	Graph t(g.V());
-	t.m_parent.resize(g.V());
-	t.m_level.resize(g.V());
-	t.m_isTree = true;
-	
-	vector<bool> discovered(g.V(), false);
-	vector<bool> visited(g.V(), false);
-	for(size_t i = 0; i < g.V(); i++)
-	{
-		if(!discovered[i])
-		{
-			if(components)
-				components->push_back(vector<size_t>());
-			
-			discovered[i] = true;
-			t.m_parent[i] = i;
-			t.m_level[i] = 0;
-			queue<size_t> Q;
-			Q.push(i);
-			while(!Q.empty())
-			{
-				size_t u = Q.front();
-				Q.pop();
-				
-				if(visited[u])
-					continue;
-				visited[u] = true;
-				
-				if(components)
-					components->back().push_back(u);
-				
-				for(set<size_t>::const_iterator j = g.adj(u).begin(); j != g.adj(u).end(); ++j)
-				{
-					if(!visited[*j])
-					{
-						if(!discovered[*j])
-						{
-							discovered[*j] = true;
-							t.m_parent[*j] = u;
-							t.m_level[*j] = t.m_level[u] + 1;
-							t.m_adj[u].insert(*j);
-							t.m_adj[*j].insert(u);
-							Q.push(*j);
-						}
-						else if(nonTreeEdges)
-						{
-							if(u < *j)
-								nonTreeEdges->insert(make_pair(u, *j));
-							else
-								nonTreeEdges->insert(make_pair(*j, u));
-						}
-					}
-				}
-			}
-		}
-	}
-	return t;
+Graph &Graph::add(const Vertex& vertex) {
+    auto it = this->_findVertex(vertex);
+    if (it != this->_verticies.end()) {
+        return *this;
+    }
+
+    this->_verticies.push_back(vertex);
+    return *this;
 }
 
-Graph::Graph(size_t v) : m_vertices(v), m_aliases(v), m_adj(v)
-{
-	for(size_t i = 0; i < v; i++)
-	{
-		m_aliases[i] = -1;
-		m_vertices[i] = i;
-	}
+Graph &Graph::add(size_t uId, size_t vId) {
+    return this->add(Vertex(uId), Vertex(vId));
 }
 
-Graph::Graph(const char *filename)
-{
-	size_t numV, numE, v;
-	
-	ifstream fin(filename);
-	fin >> numV;
-	m_adj.resize(numV);
-	
-	for(size_t u = 0; u < numV; u++)
-	{
-		fin >> numE;
-		for(size_t i = 0; i < numE; i++)
-		{
-			fin >> v;
-			m_adj[u].insert(v);
-			m_adj[v].insert(u);
-		}
-	}
-	
-	m_aliases.resize(numV);
-	m_vertices.resize(numV);
-	for(size_t i = 0; i < numV; i++)
-	{
-		m_aliases[i] = -1;
-		m_vertices[i] = i;
-	}
+Graph &Graph::add(const Vertex& u, const Vertex& v) {
+    return this->add(Edge(u, v));
 }
 
-Graph::Graph(const Graph &g, const vector<size_t> vertices) : m_vertices(vertices.size()), m_aliases(vertices.size()), m_adj(vertices.size())
-{
-	map<size_t, size_t> index;
-	for(size_t i = 0; i < vertices.size(); i++)
-	{
-		m_vertices[i] = g.m_vertices[vertices[i]];
-		m_aliases[i] = g.m_aliases[vertices[i]];
-		index[vertices[i]] = i;
-	}
-	
-	for(size_t i = 0; i < vertices.size(); i++)
-	{
-		for(set<size_t>::iterator j = g.m_adj[vertices[i]].begin(); j != g.m_adj[vertices[i]].end(); ++j)
-		{
-			m_adj[i].insert(index[*j]);
-			m_adj[index[*j]].insert(i);
-		}
-	}
+Graph &Graph::add(const Edge& edge) {
+    if (this->contains(edge)) {
+        return *this;
+    }
+
+    auto itU = this->_findVertex(edge.getU());
+    if (itU != this->_verticies.end()) {
+        itU->addNeighbor(edge.getV());
+    } else {
+        auto u = edge.getU();
+        u.addNeighbor(edge.getV());
+        this->_verticies.push_back(u);
+    }
+
+    auto itV = this->_findVertex(edge.getV());
+    if (itV != this->_verticies.end()) {
+        itV->addNeighbor(edge.getU());
+    } else {
+        auto v = edge.getV();
+        v.addNeighbor(edge.getU());
+        this->_verticies.push_back(v);
+    }
+
+    return *this;
 }
 
-void Graph::addVertex(size_t alias)
-{
-	m_adj.push_back(set<size_t>());
-	m_aliases.push_back(alias);
-	m_vertices.push_back(m_vertices.back() + 1);
+bool Graph::contains(size_t id) const {
+    return this->contains(Vertex(id));
 }
 
-void Graph::addEdge(size_t u, size_t v)
-{
-	m_adj[u].insert(v);
-	m_adj[v].insert(u);
+bool Graph::contains(const Vertex& vertex) const {
+    try {
+        this->getVertex(vertex);
+        return true;
+    } catch (const logic_error& e) {
+        return false;
+    }
 }
 
-void Graph::removeEdge(size_t u, size_t v)
-{
-	set<size_t>::iterator i = m_adj[u].find(v);
-	if(i != m_adj[u].end()) m_adj[u].erase(i);
-	
-	i = m_adj[v].find(u);
-	if(i != m_adj[v].end()) m_adj[v].erase(i);
+bool Graph::contains(size_t uId, size_t vId) const {
+    return this->contains(Vertex(uId), Vertex(vId));
 }
 
-set<size_t> &Graph::adj(size_t i)
-{
-	return m_adj[i];
+bool Graph::contains(const Vertex& u, const Vertex& v) const {
+    return this->contains(Edge(u, v));
 }
 
-const set<size_t> &Graph::adj(size_t i) const
-{
-	return m_adj[i];
+bool Graph::contains(const Edge& edge) const {
+    try {
+        this->getEdge(edge);
+        return true;
+    } catch (const logic_error& e) {
+        return false;
+    }
 }
 
-size_t Graph::vertex(size_t i) const
-{
-	if(m_aliases[i] < m_aliases.size())
-		return m_aliases[i];
-	else
-		return m_vertices[i];
+Edge Graph::getEdge(size_t uId, size_t vId) const {
+    return this->getEdge(Vertex(uId), Vertex(vId));
 }
 
-size_t Graph::V() const
-{
-	return m_adj.size();
+Edge Graph::getEdge(const Vertex& u, const Vertex& v) const {
+    return this->getEdge(Edge(u, v));
 }
 
-size_t Graph::parent(size_t i) const
-{
-	if(!m_isTree) throw invalid_argument("can only get parent in a tree");
-	return m_parent[i];
+Edge Graph::getEdge(const Edge& edge) const {
+    for (auto vertex = _verticies.begin(); vertex != _verticies.end(); vertex++) {
+        auto neighbors = vertex->getNeighbors();
+        for (auto neighbor = neighbors.begin(); neighbor != neighbors.end(); neighbor++) {
+            Edge e(Vertex(vertex->getId()), Vertex(neighbor->getId()));
+
+            if (edge == e) {
+                return e;
+            }
+        }
+    }
+    throw logic_error("Edge does not exist");
 }
 
-size_t Graph::level(size_t i) const
-{
-	if(!m_isTree) throw invalid_argument("can only get level in a tree");
-	return m_level[i];
+size_t Graph::getEdgeCount() const {
+    size_t count = 0;
+    for (auto vertex = this->_verticies.begin(); vertex != this->_verticies.end(); vertex++) {
+        count += vertex->getDegree();
+    }
+    return count / 2;
+
 }
 
-bool Graph::isTree() const
-{
-	return m_isTree;
+vector<Edge> Graph::getEdges() const {
+    unordered_set<string> distinctEdges;
+    vector<Edge> edges;
+
+    for (auto vertex = _verticies.begin(); vertex != _verticies.end(); vertex++) {
+        auto neighbors = vertex->getNeighbors();
+        for (auto neighbor = neighbors.begin(); neighbor != neighbors.end(); neighbor++) {
+            Edge e(Vertex(vertex->getId()), Vertex(neighbor->getId()));
+
+            if (distinctEdges.count(e.str()) > 0) {
+                continue;
+            }
+
+            distinctEdges.insert(e.str());
+            edges.push_back(e);
+        }
+    }
+    
+    return edges;
+}
+
+Vertex Graph::getVertex(size_t id) const {
+    return this->getVertex(Vertex(id));
+}
+
+Vertex Graph::getVertex(const Vertex& vertex) const {
+    auto v = this->_findVertex(vertex);
+    
+    if (v != this->_verticies.end()) {
+        return *v;
+    } else {
+        throw logic_error("Vertex does not exist");
+    }
+}
+
+size_t Graph::getVertexCount() const {
+    return this->_verticies.size();
+}
+
+vector<Vertex> Graph::getVerticies() const {
+    return this->_verticies;
+}
+
+bool Graph::isSubGraph(const Graph& graph) const {
+    auto edges = graph.getEdges();
+    for (auto edge = edges.begin(); edge != edges.end(); edge++) {
+        if (!this->contains(*edge)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+Graph &Graph::remove(size_t id) {
+    return this->remove(Vertex(id));
+}
+
+Graph &Graph::remove(const Vertex& vertex) {
+    auto v = this->_findVertex(vertex);
+    if (v == this->_verticies.end()) {
+        return *this;
+    }
+
+    auto neighbors = v->getNeighbors();
+    for (auto neighbor = neighbors.begin(); neighbor != neighbors.end(); neighbor++) {
+        v->removeNeighbor(*neighbor);
+    }
+
+    this->_verticies.erase(v);
+    
+    return *this;
+}
+
+Graph &Graph::remove(size_t uId, size_t vId) {
+    return this->remove(Vertex(uId), Vertex(vId));
+}
+
+Graph &Graph::remove(const Vertex& u, const Vertex& v) {
+    return this->remove(Edge(u, v));
+}
+
+Graph &Graph::remove(const Edge& edge) {
+    auto u = this->_findVertex(edge.getU());
+    if (u == this->_verticies.end()) {
+        return *this;
+    }
+    u->removeNeighbor(edge.getV());
+
+    auto v = this->_findVertex(edge.getV());
+    if (v == this->_verticies.end()) {
+        return *this;
+    }
+    v->removeNeighbor(edge.getU());
+    
+    return *this;
+}
+
+vector<Vertex>::iterator Graph::_findVertex(const Vertex& vertex) {
+    for (auto it = this->_verticies.begin(); it != this->_verticies.end(); it++) {
+        if (*it == vertex) {
+            return it;
+        }
+    }
+    return this->_verticies.end();
+}
+
+vector<Vertex>::const_iterator Graph::_findVertex(const Vertex& vertex) const {
+    for (auto it = this->_verticies.cbegin(); it != this->_verticies.cend(); it++) {
+        if (*it == vertex) {
+            return it;
+        }
+    }
+    return this->_verticies.cend();
 }
