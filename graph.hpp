@@ -32,6 +32,8 @@ namespace csce {
         Edge getEdge(const Edge& edge) const;
         size_t getEdgeCount() const;
         vector<Edge> getEdges() const;
+        vector<Edge> getEdges(size_t id) const;
+        vector<Edge> getEdges(const Vertex& incident) const;
 
         Vertex getVertex(size_t id) const;
         Vertex getVertex(const Vertex& vertex) const;

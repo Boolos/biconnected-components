@@ -33,11 +33,9 @@ int main(int argc, char **argv)
     comp4.add(6,8).add(8,7).add(7,6);
     solution.push_back(comp4);
 
-    /* 
-    * run your algorithm and test it against the solution above
-    * your result should be the exact same number of components
-    * you can just use the "==" operator to check if two Graph components are the same
-    */
+    // run your algorithm and test it against the solution above
+    // your result should be the exact same number of components
+    // you can just use the "==" operator to check if two Graph components are the same
 
 	return 0;
 }
