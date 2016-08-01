@@ -4,6 +4,7 @@
 #include <set>
 #include "tarjan-vishkin.h"
 #include "chaitanya-kothapalli.h"
+#include "util.h"
 using namespace std;
 
 int main(int argc, char **argv)
@@ -48,13 +49,21 @@ int main(int argc, char **argv)
 		
 		cout << "Found " << bicc.size() << " biconnected components!" << endl;
 		
-		for(size_t i = 0; i < bicc.size(); i++)
+		for(size_t j = 0; j < bicc.size(); j++)
 		{
-			cout << i << ": ";
-			for(set<size_t>::iterator j = bicc[i].begin(); j != bicc[i].end(); ++j)
-				cout << char('a' + *j) << " ";
+			cout << j << ": ";
+			for(set<size_t>::iterator k = bicc[j].begin(); k != bicc[j].end(); ++k)
+				cout << char('a' + *k) << " ";
 			cout << endl;
 		}
+		
+		set<size_t> articulationPoints;
+		biccToArticulationPoints(g, bicc, articulationPoints);
+		
+		cout << "Articulation points: ";
+		for(set<size_t>::iterator j = articulationPoints.begin(); j != articulationPoints.end(); ++j)
+			cout << char('a' + *j) << " ";
+		cout << endl;
 		
 		delete algorithms[i];
 	}
