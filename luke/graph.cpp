@@ -1,227 +1,74 @@
 #include "graph.h"
 #include <queue>
-#include <fstream>
-#include <stdexcept>
-#include <map>
-using std::vector;
-using std::set;
-using std::pair;
-using std::make_pair;
-using std::queue;
-using std::ifstream;
-using std::invalid_argument;
-using std::map;
+using namespace std;
 
-// static
-Graph Graph::BFSTreeRooted(const Graph &g, size_t root, set< pair<size_t, size_t> > *nonTreeEdges)
+void Graph::resize(size_t v)
 {
-	Graph t(g.V());
-	t.m_parent.resize(g.V());
-	t.m_level.resize(g.V());
-	t.m_isTree = true;
-	
-	vector<bool> discovered(g.V(), false);
-	vector<bool> visited(g.V(), false);
-	
-	discovered[root] = true;
-	t.m_parent[root] = root;
-	t.m_level[root] = 0;
-	
-	queue<size_t> Q;
-	Q.push(root);
-	while(!Q.empty())
-	{
-		size_t u = Q.front();
-		Q.pop();
-		
-		if(visited[u])
-			continue;
-		visited[u] = true;
-		
-		for(set<size_t>::const_iterator j = g.adj(u).begin(); j != g.adj(u).end(); ++j)
-		{
-			if(!visited[*j])
-			{
-				if(!discovered[*j])
-				{
-					discovered[*j] = true;
-					t.m_parent[*j] = u;
-					t.m_level[*j] = t.m_level[u] + 1;
-					t.m_adj[u].insert(*j);
-					t.m_adj[*j].insert(u);
-					Q.push(*j);
-				}
-				else if(nonTreeEdges)
-				{
-					if(u < *j)
-						nonTreeEdges->insert(make_pair(u, *j));
-					else
-						nonTreeEdges->insert(make_pair(*j, u));
-				}
-			}
-		}
-	}
-	
-	return t;
+	m_adj.resize(v);
 }
 
-// static
-Graph Graph::BFSTree(const Graph &g, vector< vector<size_t> > *components, set< pair<size_t, size_t> > *nonTreeEdges)
+void Graph::addVertex()
 {
-	Graph t(g.V());
-	t.m_parent.resize(g.V());
-	t.m_level.resize(g.V());
-	t.m_isTree = true;
-	
-	vector<bool> discovered(g.V(), false);
-	vector<bool> visited(g.V(), false);
-	for(size_t i = 0; i < g.V(); i++)
-	{
-		if(!discovered[i])
-		{
-			if(components)
-				components->push_back(vector<size_t>());
-			
-			discovered[i] = true;
-			t.m_parent[i] = i;
-			t.m_level[i] = 0;
-			queue<size_t> Q;
-			Q.push(i);
-			while(!Q.empty())
-			{
-				size_t u = Q.front();
-				Q.pop();
-				
-				if(visited[u])
-					continue;
-				visited[u] = true;
-				
-				if(components)
-					components->back().push_back(u);
-				
-				for(set<size_t>::const_iterator j = g.adj(u).begin(); j != g.adj(u).end(); ++j)
-				{
-					if(!visited[*j])
-					{
-						if(!discovered[*j])
-						{
-							discovered[*j] = true;
-							t.m_parent[*j] = u;
-							t.m_level[*j] = t.m_level[u] + 1;
-							t.m_adj[u].insert(*j);
-							t.m_adj[*j].insert(u);
-							Q.push(*j);
-						}
-						else if(nonTreeEdges)
-						{
-							if(u < *j)
-								nonTreeEdges->insert(make_pair(u, *j));
-							else
-								nonTreeEdges->insert(make_pair(*j, u));
-						}
-					}
-				}
-			}
-		}
-	}
-	return t;
-}
-
-Graph::Graph(size_t v) : m_vertices(v), m_aliases(v), m_adj(v)
-{
-	for(size_t i = 0; i < v; i++)
-	{
-		m_aliases[i] = -1;
-		m_vertices[i] = i;
-	}
-}
-
-Graph::Graph(const char *filename)
-{
-	size_t numV, numE, v;
-	
-	ifstream fin(filename);
-	fin >> numV;
-	m_adj.resize(numV);
-	
-	for(size_t u = 0; u < numV; u++)
-	{
-		fin >> numE;
-		for(size_t i = 0; i < numE; i++)
-		{
-			fin >> v;
-			m_adj[u].insert(v);
-			m_adj[v].insert(u);
-		}
-	}
-	
-	m_aliases.resize(numV);
-	m_vertices.resize(numV);
-	for(size_t i = 0; i < numV; i++)
-	{
-		m_aliases[i] = -1;
-		m_vertices[i] = i;
-	}
-}
-
-Graph::Graph(const Graph &g, const vector<size_t> vertices) : m_vertices(vertices.size()), m_aliases(vertices.size()), m_adj(vertices.size())
-{
-	map<size_t, size_t> index;
-	for(size_t i = 0; i < vertices.size(); i++)
-	{
-		m_vertices[i] = g.m_vertices[vertices[i]];
-		m_aliases[i] = g.m_aliases[vertices[i]];
-		index[vertices[i]] = i;
-	}
-	
-	for(size_t i = 0; i < vertices.size(); i++)
-	{
-		for(set<size_t>::iterator j = g.m_adj[vertices[i]].begin(); j != g.m_adj[vertices[i]].end(); ++j)
-		{
-			m_adj[i].insert(index[*j]);
-			m_adj[index[*j]].insert(i);
-		}
-	}
-}
-
-void Graph::addVertex(size_t alias)
-{
-	m_adj.push_back(set<size_t>());
-	m_aliases.push_back(alias);
-	m_vertices.push_back(m_vertices.back() + 1);
+	m_adj.push_back(list<size_t>());
 }
 
 void Graph::addEdge(size_t u, size_t v)
 {
-	m_adj[u].insert(v);
-	m_adj[v].insert(u);
+	addDirectedEdge(u, v);
+	addDirectedEdge(v, u);
+}
+
+// adds edge (u, v), keeping m_edges sorted lexicographically
+void Graph::addDirectedEdge(size_t u, size_t v)
+{
+	Edge e(u, v);
+	m_edges.insert(lower_bound(m_edges.begin(), m_edges.end(), e), e);
+	m_adj[u].push_back(v);
 }
 
 void Graph::removeEdge(size_t u, size_t v)
 {
-	set<size_t>::iterator i = m_adj[u].find(v);
-	if(i != m_adj[u].end()) m_adj[u].erase(i);
-	
-	i = m_adj[v].find(u);
-	if(i != m_adj[v].end()) m_adj[v].erase(i);
+	removeDirectedEdge(u, v);
+	removeDirectedEdge(v, u);
 }
 
-set<size_t> &Graph::adj(size_t i)
+void Graph::removeDirectedEdge(size_t u, size_t v)
 {
-	return m_adj[i];
+	Edge e(u, v);
+	m_edges.erase(lower_bound(m_edges.begin(), m_edges.end(), e));
+	m_adj[u].erase(find(m_adj[u].begin(), m_adj[u].end(), v));
 }
 
-const set<size_t> &Graph::adj(size_t i) const
+void Graph::removeEdgeSafe(size_t u, size_t v)
 {
-	return m_adj[i];
+	removeDirectedEdgeSafe(u, v);
+	removeDirectedEdgeSafe(v, u);
 }
 
-size_t Graph::vertex(size_t i) const
+void Graph::removeDirectedEdgeSafe(size_t u, size_t v)
 {
-	if(m_aliases[i] < m_aliases.size())
-		return m_aliases[i];
-	else
-		return m_vertices[i];
+	Edge e(u, v);
+	vector<Edge>::iterator i = find(m_edges.begin(), m_edges.end(), e);
+	if(i != m_edges.end())
+	{
+		m_edges.erase(i);
+		m_adj[u].erase(find(m_adj[u].begin(), m_adj[u].end(), v));
+	}
+}
+
+list<size_t> &Graph::adj(size_t u)
+{
+	return m_adj[u];
+}
+
+const list<size_t> &Graph::adj(size_t u) const
+{
+	return m_adj[u];
+}
+
+const vector<Edge> &Graph::edges() const
+{
+	return m_edges;
 }
 
 size_t Graph::V() const
@@ -229,19 +76,98 @@ size_t Graph::V() const
 	return m_adj.size();
 }
 
-size_t Graph::parent(size_t i) const
+size_t Graph::E() const
 {
-	if(!m_isTree) throw invalid_argument("can only get parent in a tree");
-	return m_parent[i];
+	return m_edges.size();
 }
 
-size_t Graph::level(size_t i) const
+void Graph::copyComponent(const Graph &g, const vector<size_t> &component, vector<size_t> &antiAlias, vector<size_t> &alias)
 {
-	if(!m_isTree) throw invalid_argument("can only get level in a tree");
-	return m_level[i];
+	resize(component.size());
+	antiAlias.resize(g.V(), -1);
+	alias.resize(component.size());
+	for(size_t i = 0; i < component.size(); i++)
+	{
+		antiAlias[component[i]] = i;
+		alias[i] = component[i];
+	}
+	for(size_t u = 0; u < component.size(); u++)
+	{
+		for(list<size_t>::const_iterator j = g.adj(component[u]).begin(); j != g.adj(component[u]).end(); ++j)
+		{
+			size_t v = antiAlias[*j];
+			if(v != -1)
+				addDirectedEdge(u, v);
+		}
+	}
 }
 
-bool Graph::isTree() const
+void Graph::spanningTree(Graph *t, Graph *nt, vector<size_t> *parent, vector<size_t> *level, vector< vector<size_t> > *components) const
 {
-	return m_isTree;
+	vector<bool> visited(V(), false), discovered(V(), false);
+	
+	queue<size_t> q;
+	q.push(0);
+	discovered[0] = true;
+	
+	if(t)
+		t->resize(V());
+	if(nt)
+		nt->resize(V());
+	
+	for(size_t i = 0; i < V(); i++)
+	{
+		if(!visited[i])
+		{
+			q.push(i);
+			discovered[i] = true;
+			
+			if(parent)
+			{
+				parent->resize(V());
+				(*parent)[i] = i;
+			}
+			if(level)
+			{
+				level->resize(V());
+				(*level)[i] = i;
+			}
+			if(components)
+				components->push_back(vector<size_t>(1, i));
+			
+			while(!q.empty())
+			{
+				size_t u = q.front();
+				q.pop();
+				
+				if(visited[u])
+					continue;
+				visited[u] = true;
+				
+				for(list<size_t>::const_iterator j = adj(u).begin(); j != adj(u).end(); ++j)
+				{
+					size_t v = *j;
+					if(!visited[v])
+					{
+						if(!discovered[v])
+						{
+							discovered[v] = true;
+							q.push(v);
+							
+							if(t)
+								t->addEdge(u, v);
+							if(parent)
+								(*parent)[v] = u;
+							if(level)
+								(*level)[v] = (*level)[u] + 1;
+							if(components)
+								components->back().push_back(*j);
+						}
+						else if(nt)
+							nt->addEdge(u, v);
+					}
+				}
+			}
+		}
+	}
 }

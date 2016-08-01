@@ -1,174 +1,113 @@
-#include "graph.h"
-#include <iostream>
-#include <set>
-#include <map>
-#include <vector>
-#include <tuple>
-using std::cout;
-using std::endl;
-using std::ostream;
-using std::set;
-using std::vector;
-using std::pair;
-using std::make_pair;
-using std::map;
+#include "chaitanya-kothapalli.h"
+#include "util.h"
+using namespace std;
 
-size_t leastCommonAncestor(const Graph &t, size_t u, size_t v, size_t *c1 = NULL, size_t *c2 = NULL)
+// virtual
+const char *ChaitanyaKothapalli::name()
 {
-	if(!t.isTree())
-		return leastCommonAncestor(Graph::BFSTree(t), u, v, c1, c2);
-	size_t lu, lv;
-	while(u != v)
-	{
-		if(c1) *c1 = u;
-		if(c2) *c2 = v;
-		lu = t.level(u);
-		lv = t.level(v);
-		if(lu >= lv)
-			u = t.parent(u);
-		if(lv >= lu)
-			v = t.parent(v);
-	}
-	return u;
+	return "Chaitanya-Kothapalli";
 }
 
-vector<Graph> removeBridges(const Graph &g, const Graph &t, const set< pair<size_t, size_t> > &nonTreeEdges)
+// virtual
+void ChaitanyaKothapalli::getBiCC(const Graph &g, vector< set<size_t> > &bicc)
+{
+	Graph t, nt;
+	vector<size_t> parent, level;
+	vector< vector<size_t> > components;
+	vector<Edge> bridges;
+	
+	g.spanningTree(&t, &nt, &parent, &level);
+	removeBridges(g, t, nt, parent, level, components, &bridges);
+	
+	for(size_t i = 0; i < components.size(); i++) // parallelize
+	{
+		Graph aux, tPrime, ntPrime;
+		vector<size_t> parentPrime, levelPrime, alias;
+		vector< vector<size_t> > componentsPrime;
+		
+		auxiliaryGraph(g, nt, parent, level, components[i], aux, alias);
+		aux.spanningTree(&tPrime, &ntPrime, &parentPrime, &levelPrime);
+		removeBridges(aux, tPrime, ntPrime, parentPrime, levelPrime, componentsPrime);
+		
+		for(size_t j = 0; j < componentsPrime.size(); j++)
+		{
+			set<size_t> component;
+			for(size_t k = 0; k < componentsPrime[j].size(); k++)
+				component.insert(alias[componentsPrime[j][k]]);
+			if(component.size() > 1)
+				bicc.push_back(component);
+		}
+	}
+	
+	for(size_t i = 0; i < bridges.size(); i++)
+	{
+		bicc.push_back(set<size_t>());
+		bicc.back().insert(bridges[i].first);
+		bicc.back().insert(bridges[i].second);
+	}
+}
+
+void ChaitanyaKothapalli::removeBridges(const Graph &g, const Graph &t, const Graph &nt, vector<size_t> &parent, vector<size_t> &level, vector< vector<size_t> > &components, vector<Edge> *bridges)
 {
 	Graph gPrime(g);
 	
-	set< pair<size_t, size_t> > bridges;
-	for(size_t i = 0; i < g.V(); i++)
-		for(set<size_t>::const_iterator j = t.adj(i).begin(); j != t.adj(i).end(); ++j)
-			if(i < *j)
-				bridges.insert(make_pair(i, *j));
+	vector<bool> marked(t.V(), false);
+	size_t u, v, lu, lv;
 	
-	for(set< pair<size_t, size_t> >::const_iterator i = nonTreeEdges.begin(); i != nonTreeEdges.end(); ++i)
+	for(size_t i = 0; i < nt.E(); i++)
 	{
-		size_t u = i->first, v = i->second, lu, lv;
+		u = nt.edges()[i].first, v = nt.edges()[i].second;
 		while(u != v)
 		{
-			lu = t.level(u);
-			lv = t.level(v);
+			lu = level[u];
+			lv = level[v];
 			if(lu >= lv)
 			{
-				if(u < t.parent(u))
-					bridges.erase(make_pair(u, t.parent(u)));
-				else
-					bridges.erase(make_pair(t.parent(u), u));
-				u = t.parent(u);
+				marked[u] = true;
+				u = parent[u];
 			}
 			if(lv >= lu)
 			{
-				if(v < t.parent(v))
-					bridges.erase(make_pair(v, t.parent(v)));
-				else
-					bridges.erase(make_pair(t.parent(v), v));
-				v = t.parent(v);
+				marked[v] = true;
+				v = parent[v];
 			}
 		}
 	}
 	
-	for(set< pair<size_t, size_t> >::iterator i = bridges.begin(); i != bridges.end(); ++i)
-		gPrime.removeEdge(i->first, i->second);
-	
-	vector< vector<size_t> > components;
-	Graph::BFSTree(gPrime, &components);
-	
-	vector<Graph> forest(components.size());
-	for(size_t i = 0; i < components.size(); i++)
-		forest[i] = Graph(gPrime, components[i]);
-	
-	return forest;
-}
-
-Graph auxiliaryGraph(const Graph &g)
-{
-	set< pair<size_t, size_t> > nonTreeEdges;
-	
-	Graph gPrime(g);
-	Graph t = Graph::BFSTreeRooted(g, 0, &nonTreeEdges);
-	
-	for(set< pair<size_t, size_t> >::iterator j = nonTreeEdges.begin(); j != nonTreeEdges.end(); ++j)
+	for(size_t i = 1; i < g.V(); i++)
 	{
-		size_t b1, b2;
-		size_t x = leastCommonAncestor(t, j->first, j->second, &b1, &b2);
-		size_t xPrime = gPrime.V();
-		gPrime.removeEdge(x, b1);
-		gPrime.removeEdge(x, b2);
-		gPrime.addVertex(g.vertex(x));
-		gPrime.addEdge(x, xPrime);
-		gPrime.addEdge(xPrime, b1);
-		gPrime.addEdge(xPrime, b2);
-	}
-	
-	return gPrime;
-}
-
-void printGraph(const Graph &g, ostream &out = cout)
-{
-	for(size_t i = 0; i < g.V(); i++)
-	{
-		cout << char('a' + g.vertex(i)) << ": ";
-		for(set<size_t>::const_iterator j = g.adj(i).begin(); j != g.adj(i).end(); ++j)
-			out << char('a' + g.vertex(*j)) << " ";
-		out << endl;
-	}
-}
-
-ostream &operator<<(ostream &out, const Graph &g)
-{
-	printGraph(g, out);
-	return out;
-}
-
-set< set<size_t> > biconnectedComponents(const Graph &g)
-{
-	set< set<size_t> > components;
-	set< pair<size_t, size_t> > nonTreeEdges;
-	Graph t = Graph::BFSTree(g, NULL, &nonTreeEdges);
-	
-	vector<Graph> forest = removeBridges(g, t, nonTreeEdges);
-	for(size_t i = 0; i < forest.size(); i++) // todo: parallelize this loop
-	{
-		Graph gPrime = auxiliaryGraph(forest[i]);
-		
-		set< pair<size_t, size_t> > nonTreeEdgesPrime;
-		Graph tPrime = Graph::BFSTreeRooted(gPrime, 0, &nonTreeEdgesPrime);
-		vector<Graph> fPrime = removeBridges(gPrime, tPrime, nonTreeEdgesPrime);
-		
-		for(size_t j = 0; j < fPrime.size(); j++)
+		if(!marked[i])
 		{
-			set<size_t> component;
-			for(size_t k = 0; k < fPrime[j].V(); k++)
-				component.insert(fPrime[j].vertex(k));
-			if(component.size() > 1)
-				components.insert(component);
+			gPrime.removeEdgeSafe(i, parent[i]);
+			if(bridges)
+				bridges->push_back(Edge(i, parent[i]));
 		}
 	}
 	
-	return components;
+	gPrime.spanningTree(NULL, NULL, NULL, NULL, &components);
 }
 
-int main(int argc, char **argv)
+void ChaitanyaKothapalli::auxiliaryGraph(const Graph &g, const Graph &nt, const vector<size_t> &parent, const vector<size_t> &level, const vector<size_t> &component, Graph &aux, vector<size_t> &alias)
 {
-	if(argc > 1)
+	vector<size_t> antiAlias;
+	aux.copyComponent(g, component, antiAlias, alias);
+	for(size_t i = 0; i < component.size(); i++)
 	{
-		Graph g(argv[1]);
-		cout << "Graph:\n" << g << endl;
-		
-		set< set<size_t> > components = biconnectedComponents(g);
-		cout << "Biconnected components:" << endl;
-		for(set< set<size_t> >::iterator i = components.begin(); i != components.end(); ++i)
+		size_t u = component[i];
+		for(list<size_t>::const_iterator j = nt.adj(u).begin(); j != nt.adj(u).end(); ++j)
 		{
-			for(set<size_t>::iterator j = i->begin(); j != i->end(); ++j)
-				cout << char('a' + *j) << " ";
-			cout << endl;
+			size_t v = *j, a, b;
+			if(u < v)
+			{
+				size_t x = LCA(parent, level, u, v, &a, &b), xPrime = aux.V();
+				alias.push_back(x);
+				x = antiAlias[x], a = antiAlias[a], b = antiAlias[b];
+				aux.removeEdgeSafe(x, a);
+				aux.removeEdgeSafe(x, b);
+				aux.addVertex();
+				aux.addEdge(xPrime, a);
+				aux.addEdge(xPrime, b);
+			}
 		}
 	}
-	else
-	{
-		cout << "Usage: ./bicc [inputgraph]" << endl;
-	}
-	
-	return 0;
 }
