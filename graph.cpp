@@ -135,6 +135,28 @@ vector<Edge> Graph::getEdges() const {
     return edges;
 }
 
+
+vector<Edge> Graph::getEdges(size_t id) const {
+    return this->getEdges(Vertex(id));
+}
+
+vector<Edge> Graph::getEdges(const Vertex& incident) const {
+    vector<Edge> edges;
+
+    auto vertex = this->_findVertex(incident);
+    if (vertex == this->_verticies.end()) {
+        return edges;
+    }
+
+    auto neighbors = vertex->getNeighbors();
+    for (auto neighbor = neighbors.begin(); neighbor != neighbors.end(); neighbor++) {
+        Edge e(vertex->getId(), neighbor->getId());
+        edges.push_back(e);
+    }
+    
+    return edges;
+}
+
 Vertex Graph::getVertex(size_t id) const {
     return this->getVertex(Vertex(id));
 }

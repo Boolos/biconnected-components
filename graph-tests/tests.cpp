@@ -246,4 +246,17 @@ SCENARIO("Inspecting a graph") {
             }
         }
     }
+
+    GIVEN("A graph with multiple edges incident to a single vertex") {
+        Graph graph;
+        graph.add(0,1).add(0,2).add(0,3).add(1,2).add(3,4);
+
+        WHEN("querying for all edges incident to 0") {
+            auto edges = graph.getEdges(0);
+
+            THEN("there are 3 edges returned") {
+                REQUIRE(edges.size() == 3);
+            }
+        }
+    }
 }
