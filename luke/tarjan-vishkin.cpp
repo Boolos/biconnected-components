@@ -25,6 +25,14 @@ void TarjanVishkin::getBiCC(const Graph &g, vector< set<size_t> > &bicc)
 	auxiliaryGraph(g);
 	gPrime.spanningTree(NULL, NULL, NULL, NULL, &components);
 	remapAuxiliaryGraph(bicc);
+	for(size_t i = 0; i < bicc.size(); i++)
+	{
+		if(bicc[i].size() == 0)
+		{
+			bicc.erase(bicc.begin() + i);
+			i--;
+		}
+	}
 }
 
 void TarjanVishkin::eulerTour()
