@@ -27,6 +27,11 @@ namespace csce {
 		bool contains(const Vertex& u, const Vertex& v) const;
         bool contains(const Edge& edge) const;
 
+        Graph difference(const Graph& other) const;
+
+        size_t getDegree(size_t id) const; 
+        size_t getDegree(const Vertex& vertex) const; 
+
         Edge getEdge(size_t uId, size_t vId) const;
         Edge getEdge(const Vertex& u, const Vertex& v) const;
         Edge getEdge(const Edge& edge) const;
@@ -42,11 +47,14 @@ namespace csce {
         
         bool isSubGraph(const Graph& graph) const;
 
+        Graph join(const Graph& other) const;
+        
 		Graph &remove(size_t id);
 		Graph &remove(const Vertex& vertex);
 		Graph &remove(size_t uId, size_t vId);
 		Graph &remove(const Vertex& u, const Vertex& v);
 		Graph &remove(const Edge& edge);
+
 
 		bool operator ==(const Graph& other) const {
             if (this->getVertexCount() != other.getVertexCount()) {
