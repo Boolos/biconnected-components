@@ -12,6 +12,7 @@ namespace csce {
 	public:
         Vertex* parent;
         string color;
+        size_t level;
 
 		Vertex(size_t id);
         
