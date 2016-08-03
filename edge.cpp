@@ -7,6 +7,10 @@ Edge::Edge(size_t uId, size_t vId) : _u(Vertex(uId)), _v(Vertex(vId)), _lca(Vert
 
 Edge::Edge(Vertex u, Vertex v) : _u(u), _v(v), _lca(Vertex(-1)) { }
 
+Vertex Edge::getLca() const {
+    return this->_lca;
+}
+
 Vertex Edge::getU() const {
     return this->_u;
 }

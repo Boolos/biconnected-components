@@ -40,6 +40,8 @@ namespace csce {
         vector<Edge> getEdges(size_t id) const;
         vector<Edge> getEdges(const Vertex& incident) const;
 
+        Vertex getRoot() const;
+
         Vertex getVertex(size_t id) const;
         Vertex getVertex(const Vertex& vertex) const;
         size_t getVertexCount() const;
@@ -85,6 +87,7 @@ namespace csce {
         vector<Vertex> _verticies;
         vector<Vertex>::iterator _findVertex(const Vertex& vertex);
         vector<Vertex>::const_iterator _findVertex(const Vertex& vertex) const;
+        Vertex _root;
 	};
 }
 

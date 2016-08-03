@@ -13,6 +13,7 @@ namespace csce {
         Vertex* parent;
         string color;
         size_t level;
+        bool isAlias;
 
 		Vertex(size_t id);
         

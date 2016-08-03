@@ -3,7 +3,7 @@
 using namespace csce;
 using namespace std;
 
-Graph::Graph() { }
+Graph::Graph() : _root(Vertex(-1)) { }
 
 Graph &Graph::add(size_t id) {
     return this->add(Vertex(id));
@@ -11,7 +11,7 @@ Graph &Graph::add(size_t id) {
 
 Graph &Graph::add(const Vertex& vertex) {
     auto it = this->_findVertex(vertex);
-    if (it != this->_verticies.end()) {
+    if (it != this->_verticies.end() && !vertex.isAlias) {
         return *this;
     }
 
@@ -193,6 +193,10 @@ vector<Edge> Graph::getEdges(const Vertex& incident) const {
     }
     
     return edges;
+}
+
+Vertex Graph::getRoot() const {
+    return this->_root;
 }
 
 Vertex Graph::getVertex(size_t id) const {

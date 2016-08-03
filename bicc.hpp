@@ -5,20 +5,24 @@
 #include <sstream>
 #include "graph.hpp"
 #include "vertex.hpp"
+#include "edge.hpp"
 
 using namespace std;
 
 namespace csce {
 	class Bicc {
 	public:
-        Bicc();
+        Bicc(int nthreads);
 
         vector<Vertex> getArticulationPoints(Graph& sparseGraph);
         Graph breadthFirstSearch(Graph& sparseGraph);
         vector<Graph> findBridges(Graph& graph, Graph& bfsTree);
-        vector<Vertex> findArtPointsInParallel(vector<Graph> components);
+        vector<Vertex> findArtPointsInParallel(vector<Graph> components, Graph& bfsTree);
+        Graph constructAuxGraph(Graph graph);
+        bool isArticulationPoint(const Graph& bfs, const Graph& auxGraph) const;
 
 	private:
+        int _nthreads;
 	};
 }
 
