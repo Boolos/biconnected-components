@@ -1,7 +1,14 @@
 # biconnected-components
 Experimentation with parallelizing algorithms related to biconnected components
 
-The graph class (may be replaced by a better one later) assumes the file is stored with the first line being the number of vertices V, followed by V lines. For each line i, the line begins with the number of vertices adjacent to vertex i (call it x), followed by the x vertices of vertex i's adjacency list.
+###Each project is now in their separate directory.
 
-#####To compile and run tests for graphlib:
-`g++-5 -O3 -fopenmp -m64 -std=c++11 ./graphlib/*.cpp`
+###You can use the code in graph-generator directory to generate random graphs and write them out to a file. 
+The supported flags are defined in the main.cpp file, but some of the more useful ones for you will be these:
+* <code>-n nvertices</code> -> the number of vertices in the graph
+* <code>-m nedges</code> -> the number of edges in the graph
+* <code>-o file_path</code> -> write the graph to a file
+* <code>-d</code> ->if specified, the graph will be a directed graph, otherwise by default it will be undirected.
+* <code>-c</code> ->if specified, the graph will be connected, otherwise by default there is no guarantee that it will be connected.
+* <code>-k</code> ->if specified, the graph will be a complete graph of size n (specified by the -n parameter)
+So if you want to specify an average degree per vertex, you would need to make sure the value of m/n is equal to the desired average degree.
