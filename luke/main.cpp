@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 		chrono::high_resolution_clock::time_point stop_time = chrono::high_resolution_clock::now();
 		size_t nanoseconds = chrono::duration_cast<std::chrono::nanoseconds>(stop_time - start_time).count();
 		
-		cout << nanoseconds / 1e9 << " seconds, " << bicc.size() << " biconnected components" << endl;
+		cout << "Took " << nanoseconds / 1e9 << " seconds" << endl;
 		
 #ifdef DEBUG
 		for(size_t j = 0; j < bicc.size(); j++)
