@@ -38,6 +38,7 @@ namespace csce {
 		csce::graph generate_complete(int nvertices);
 		void connect_graph(csce::graph& graph, bool directed);
 		csce::graph generate_random_bipartite(int nvertices, int nedges, bool connected, bool directed);
+		csce::graph generate_complete_bipartite(int nvertices);
 		csce::graph load_from_file(const std::string& file_path);
 		void write_to_file(csce::graph& g, const std::string& file_path);
 		

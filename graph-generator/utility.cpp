@@ -135,6 +135,31 @@ csce::graph csce::utility::generate_random_bipartite(int nvertices, int nedges, 
 	return bipartite;
 }
 
+csce::graph csce::utility::generate_complete_bipartite(int nvertices) {
+	csce::graph bipartite(nvertices);
+	std::vector<csce::vertex> va;
+	std::vector<csce::vertex> vb;
+	auto vertices = bipartite.vertices();
+	int vertex_count = 0;
+	
+	for(auto& vertex : vertices){
+		if(vertex_count % 2 == 0){
+			va.push_back(vertex);
+		} else {
+			vb.push_back(vertex);
+		}
+		vertex_count++;
+	}
+	
+	for(std::size_t x=0; x<va.size(); x++){
+		for(std::size_t y=0; y<vb.size(); y++){
+			bipartite.add_undirected(va[x], vb[y]);
+		}
+	}
+	
+	return bipartite;
+}
+
 
 csce::graph csce::utility::generate_complete(int nvertices) {
 	csce::graph result(nvertices);

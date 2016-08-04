@@ -87,16 +87,23 @@ int main(int argc, char* argv[]) {
 	//
 	if(input_file_path.empty()){
 		if(bipartite){
-			std::cout << "Populating bipartite, " << (directed ? "directed, " : "undirected, ") << (connected ? "connected " : "not connected ") << "graph with " << nvertices << " vertices and " << nedges << " edges ... " << std::flush;
-			graph = csce::utility::generate_random_bipartite(nvertices, nedges, connected, directed);
-		} else if(complete){
-			//no input file was specified, so populate the array with random numbers
-			std::cout << "Populating complete graph with " << nvertices << " vertices ... " << std::flush;
-			graph = csce::utility::generate_complete(nvertices);
+			if(complete){
+				std::cout << "Populating complete bipartite, " << (directed ? "directed, " : "undirected, ") << (connected ? "connected " : "not connected ") << "graph with " << nvertices << " vertices and " << nedges << " edges ... " << std::flush;
+				graph = csce::utility::generate_complete_bipartite(nvertices);
+			} else {
+				std::cout << "Populating bipartite, " << (directed ? "directed, " : "undirected, ") << (connected ? "connected " : "not connected ") << "graph with " << nvertices << " vertices and " << nedges << " edges ... " << std::flush;
+				graph = csce::utility::generate_random_bipartite(nvertices, nedges, connected, directed);
+			}
 		} else {
-			//no input file was specified, so populate the array with random numbers
-			std::cout << "Populating " << (directed ? "a directed, " : "an undirected, ") << (connected ? "connected, " : "not connected, ") << "graph with " << nvertices << " vertices and " << nedges << " edges ... " << std::flush;
-			graph = csce::utility::generate_random(nvertices, nedges, connected, directed);
+			if(complete){
+				//no input file was specified, so populate the array with random numbers
+				std::cout << "Populating complete graph with " << nvertices << " vertices ... " << std::flush;
+				graph = csce::utility::generate_complete(nvertices);
+			} else {
+				//no input file was specified, so populate the array with random numbers
+				std::cout << "Populating " << (directed ? "a directed, " : "an undirected, ") << (connected ? "connected, " : "not connected, ") << "graph with " << nvertices << " vertices and " << nedges << " edges ... " << std::flush;
+				graph = csce::utility::generate_random(nvertices, nedges, connected, directed);
+			}
 		}
 	} else {
 		//load from the specified file
