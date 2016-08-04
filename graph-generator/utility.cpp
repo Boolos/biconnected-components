@@ -47,35 +47,93 @@ csce::graph csce::utility::generate_random(int nvertices, int nedges, bool conne
 void csce::utility::connect_graph(csce::graph& graph, bool directed){
 	auto vertices = graph.vertices();
 	auto left_to_visit = graph.vertices();
+	std::vector<csce::vertex> components;
 	for(auto& vertex : vertices){
-		std::stack<csce::vertex> s;
-		s.push(vertex);
-		while(!s.empty()){
-			csce::vertex current = s.top();
-			s.pop();
-			auto neighbors = graph.neighbors(current);
-			for(auto& neighbor : neighbors){
-				if(left_to_visit.find(neighbor) != left_to_visit.end()){
-					s.push(neighbor);
-					left_to_visit.erase(neighbor);
-				}
-			}
-		}
-		if(!left_to_visit.empty()){
-			for(auto& unvisited : left_to_visit){
-				if(directed){
-					graph.add_undirected(vertex, unvisited);
-				} else {
-					graph.add(vertex, unvisited);
+		if(left_to_visit.find(vertex) != left_to_visit.end()){
+			components.push_back(vertex);
+			std::stack<csce::vertex> s;
+			s.push(vertex);
+			while(!s.empty()){
+				csce::vertex current = s.top();
+				s.pop();
+				auto neighbors = graph.neighbors(current);
+				for(auto& neighbor : neighbors){
+					if(left_to_visit.find(neighbor) != left_to_visit.end()){
+						s.push(neighbor);
+						left_to_visit.erase(neighbor);
+					}
 				}
 			}
 		}
 	}
+	
+	for(std::size_t x=0; x<components.size() - 1; x++){
+		if(directed){
+			graph.add_undirected(components[x], components[x+1]);
+		} else {
+			graph.add(components[x], components[x+1]);
+		}
+	}
 }
 
-//csce::graph csce::utility::generate_random_bipartite(int nvertices, int nedges, bool directed){
-//
-//}
+csce::graph csce::utility::generate_random_bipartite(int nvertices, int nedges, bool connected, bool directed){
+	csce::graph bipartite(nvertices);
+	std::vector<csce::vertex> va;
+	std::vector<csce::vertex> vb;
+	auto vertices = bipartite.vertices();
+	int x = 0;
+	
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	
+	for(auto& vertex : vertices){
+		if(x % 2 == 0){
+			va.push_back(vertex);
+		} else {
+			vb.push_back(vertex);
+		}
+		x++;
+	}
+	
+	csce::utility::uniform_distribution<std::size_t> dist_a(0UL, va.size() - 1UL);
+	csce::utility::uniform_distribution<std::size_t> dist_b(0UL, vb.size() - 1UL);
+	
+	for(int x=0; x<nedges; x++){
+		std::size_t a = dist_a(mt);
+		std::size_t b = dist_b(mt);
+		
+		if((directed && bipartite.contains(va[a], vb[b])) || (!directed && bipartite.contains(va[a], vb[b]) && bipartite.contains(vb[b], va[a]))){
+			continue; //the edge already exists
+		}
+		
+		bipartite.add(va[a], vb[b]);
+		if(!directed){
+			bipartite.add(vb[b], va[a]);
+		}
+	}
+	
+	if(connected && !va.empty() && !vb.empty()){
+		for(auto& vertex : va){
+			if(bipartite.degree(vertex) == 0){
+				bipartite.add(vertex, vb[0]);
+				if(!directed){
+					bipartite.add(vb[0], vertex);
+				}
+			}
+		}
+		
+		for(auto& vertex : vb){
+			if(bipartite.degree(vertex) == 0){
+				bipartite.add(vertex, va[0]);
+				if(!directed){
+					bipartite.add(va[0], vertex);
+				}
+			}
+		}
+	}
+	
+	return bipartite;
+}
 
 
 csce::graph csce::utility::generate_complete(int nvertices) {

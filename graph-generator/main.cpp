@@ -3,7 +3,6 @@
 #include <chrono>
 #include <vector>
 #include <string>
-#include <thread>
 #include <unordered_set>
 #include <set>
 #include <cmath>
@@ -12,18 +11,13 @@
 #include <utility>
 
 #include "utility.hpp"
-#include "test.hpp"
 #include "graph.hpp"
-#include "connected_components.hpp"
 
 int main(int argc, char* argv[]) {
 	int nvertices = 320; //the default number of vertices. This can be changed by specifying the -n runtime argument.
 	int nedges = 0;
-	int thread_count = std::thread::hardware_concurrency(); //the default number of threads is the number of hardware cores on the current computer. This can be changed by the -t runtime argument.
 	std::string input_file_path; //where to load data from, if anywhere. If this is not specified, the data will be generated at runtime.
 	std::string output_file_path; //where to write out the generated data, if anywhere.
-	long long int duration = 0;
-	bool test_mode = false;
 	
 	bool directed = false;
 	bool bipartite = false;
@@ -33,7 +27,7 @@ int main(int argc, char* argv[]) {
 	csce::graph graph;
 	
 	int c;
-	while((c = getopt(argc, argv, ":bcdDf:km:n:o:t:")) != -1){
+	while((c = getopt(argc, argv, ":bcdf:km:n:o:")) != -1){
 		switch(c){
 			case 'b':
 				bipartite = true;
@@ -45,10 +39,6 @@ int main(int argc, char* argv[]) {
 				
 			case 'd':
 				directed = true;
-				break;
-				
-			case 'D':
-				test_mode = true;
 				break;
 				
 			case 'f':
@@ -81,13 +71,6 @@ int main(int argc, char* argv[]) {
 				}
 				break;
 				
-			case 't':
-				if(optarg != NULL){
-					std::stringstream argument_stream(optarg);
-					argument_stream >> thread_count;
-				}
-				break;
-				
 			case '?':
 				break;
 		}
@@ -97,21 +80,16 @@ int main(int argc, char* argv[]) {
 		nedges = 2 * nvertices;
 	}
 	
-	//
-	// run unit tests
-	//
-	if(test_mode){
-		//do not run this in debug mode
-		csce::test(false).run();
-	}
-	
 	
 	//
 	//first - load the values into the array, either by populating it
 	//        with random values or by reading the values from a file.
 	//
 	if(input_file_path.empty()){
-		if(complete){
+		if(bipartite){
+			std::cout << "Populating bipartite, " << (directed ? "directed, " : "undirected, ") << (connected ? "connected " : "not connected ") << "graph with " << nvertices << " vertices and " << nedges << " edges ... " << std::flush;
+			graph = csce::utility::generate_random_bipartite(nvertices, nedges, connected, directed);
+		} else if(complete){
 			//no input file was specified, so populate the array with random numbers
 			std::cout << "Populating complete graph with " << nvertices << " vertices ... " << std::flush;
 			graph = csce::utility::generate_complete(nvertices);
@@ -137,25 +115,6 @@ int main(int argc, char* argv[]) {
 		csce::utility::write_to_file(graph, output_file_path);
 		std::cout << "done." << std::endl;
 	}
-	
-	csce::connected_components algorithm(thread_count);
-	
-	std::cout << "-------------------------------------------" << std::endl;
-	std::cout << "Computing articulation vertices ... " << std::flush;
-	
-	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
-	std::vector<csce::vertex> result = algorithm.find_articulation_vertices(graph);
-	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
-	duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_time - start_time).count();
-	
-	std::cout << "done in " << csce::utility::duration_string(duration) << std::endl;
-	
-	std::cout << "There were " << result.size() << " articulation vertices. " << std::endl;
-	std::cout << "-------------------------------------------" << std::endl;
-	for(csce::vertex& v : result){
-		std::cout << v.str() << std::endl;
-	}
-	std::cout << "-------------------------------------------" << std::endl;
 	
 	return 0;
 }
