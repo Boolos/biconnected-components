@@ -14,6 +14,8 @@ public:
 	void addVertex();
 	void addEdge(size_t u, size_t v);
 	void addDirectedEdge(size_t u, size_t v);
+	void addEdgeSafe(size_t u, size_t v);
+	void addDirectedEdgeSafe(size_t u, size_t v);
 	void removeEdge(size_t u, size_t v);
 	void removeDirectedEdge(size_t u, size_t v);
 	void removeEdgeSafe(size_t u, size_t v);

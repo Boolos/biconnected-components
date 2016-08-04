@@ -6,6 +6,7 @@
 class TarjanVishkin : public BiCC
 {
 public:
+	TarjanVishkin(size_t nthreads = 1) : BiCC(nthreads) {}
 	virtual const char *name();
 	virtual void getBiCC(const Graph &g, std::vector< std::set<size_t> > &bicc);
 private:

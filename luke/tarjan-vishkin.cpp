@@ -5,6 +5,7 @@
 #include <tuple>
 #include <algorithm>
 #include <queue>
+#include <omp.h>
 #include "tarjan-vishkin.h"
 #include "util.h"
 using namespace std;
@@ -25,6 +26,7 @@ void TarjanVishkin::getBiCC(const Graph &g, vector< set<size_t> > &bicc)
 	auxiliaryGraph(g);
 	gPrime.spanningTree(NULL, NULL, NULL, NULL, &components);
 	remapAuxiliaryGraph(bicc);
+	
 	for(size_t i = 0; i < bicc.size(); i++)
 	{
 		if(bicc[i].size() == 0)
@@ -50,7 +52,9 @@ void TarjanVishkin::eulerTour()
 	}
 	
 	succ.resize(edges.size());
-	for(size_t i = 0; i < edges.size(); i++) // parallelizable
+	
+	#pragma omp parallel for num_threads(this->nthreads)
+	for(size_t i = 0; i < edges.size(); i++)
 	{
 		if(next[twin[i]] != -1)
 			succ[i] = next[twin[i]];
@@ -79,6 +83,8 @@ void TarjanVishkin::preorderVertices()
 void TarjanVishkin::findLow()
 {
 	low.resize(nt.V());
+	
+	#pragma omp parallel for num_threads(this->nthreads)
 	for(size_t i = 0; i < nt.V(); i++) // parallelize
 		low[i] = i;
 	
@@ -86,11 +92,13 @@ void TarjanVishkin::findLow()
 	while(changed)
 	{
 		changed = false;
+		
+		#pragma omp parallel for num_threads(this->nthreads)
 		for(size_t i = 0; i < nt.V(); i++)
 		{
 			for(list<size_t>::const_iterator j = t.adj(i).begin(); j != t.adj(i).end(); ++j)
 			{
-				if(level[i] < level[*j] && low[*j] < low[i])
+				if(level[i] < level[*j] && level[low[*j]] < level[low[i]])
 				{
 					low[i] = low[*j];
 					changed = true;
@@ -98,7 +106,7 @@ void TarjanVishkin::findLow()
 			}
 			for(list<size_t>::const_iterator j = nt.adj(i).begin(); j != nt.adj(i).end(); ++j)
 			{
-				if(low[*j] < low[i])
+				if(level[low[*j]] < level[low[i]])
 				{
 					low[i] = low[*j];
 					changed = true;
@@ -110,7 +118,7 @@ void TarjanVishkin::findLow()
 
 void TarjanVishkin::auxiliaryGraph(const Graph &g)
 {
-	gPrime.resize(g.V() + nt.E() / 2);
+	gPrime.resize(g.V() + nt.E());
 	vector<size_t> N(g.E(), 0);
 	
 	size_t ti = 0, nti = 0;
@@ -120,8 +128,7 @@ void TarjanVishkin::auxiliaryGraph(const Graph &g)
 			ti++;
 		else
 		{
-			if(g.edges()[i].first < g.edges()[i].second)
-				N[i] = 1;
+			N[i] = 1;
 			nti++;
 		}
 	}
@@ -134,7 +141,7 @@ void TarjanVishkin::auxiliaryGraph(const Graph &g)
 		size_t u = g.edges()[i].first, v = g.edges()[i].second;
 		if(nti >= nt.edges().size() || g.edges()[i] == t.edges()[ti])
 		{
-			if(preorder[u] < preorder[v] && preorder[low[v]] < preorder[u])
+			if(level[u] < level[v] && level[low[v]] <= level[u])
 				gPrime.addEdge(u, v);
 			ti++;
 		}

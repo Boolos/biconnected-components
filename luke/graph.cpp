@@ -1,5 +1,6 @@
 #include "graph.h"
 #include <queue>
+#include <algorithm>
 using namespace std;
 
 void Graph::resize(size_t v)
@@ -24,6 +25,23 @@ void Graph::addDirectedEdge(size_t u, size_t v)
 	Edge e(u, v);
 	m_edges.insert(lower_bound(m_edges.begin(), m_edges.end(), e), e);
 	m_adj[u].push_back(v);
+}
+
+void Graph::addEdgeSafe(size_t u, size_t v)
+{
+	addDirectedEdgeSafe(u, v);
+	addDirectedEdgeSafe(v, u);
+}
+
+void Graph::addDirectedEdgeSafe(size_t u, size_t v)
+{
+	Edge e(u, v);
+	vector<Edge>::iterator i = lower_bound(m_edges.begin(), m_edges.end(), e);
+	if(i == m_edges.end() || *i != e)
+	{
+		m_edges.insert(i, e);
+		m_adj[u].push_back(v);
+	}
 }
 
 void Graph::removeEdge(size_t u, size_t v)
