@@ -69,9 +69,9 @@ void csce::utility::connect_graph(csce::graph& graph, bool directed){
 	
 	for(std::size_t x=0; x<components.size() - 1; x++){
 		if(directed){
-			graph.add_undirected(components[x], components[x+1]);
-		} else {
 			graph.add(components[x], components[x+1]);
+		} else {
+			graph.add_undirected(components[x], components[x+1]);
 		}
 	}
 }
