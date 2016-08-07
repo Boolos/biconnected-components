@@ -1,7 +1,47 @@
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <chrono>
+#include <vector>
+#include <string>
+#include <thread>
+#include <unordered_set>
+#include <set>
+#include <cmath>
+#include <algorithm>
+#include <sstream>
+#include <utility>
+
 #include "graph.hpp"
+#include "bicc.hpp"
 
 using namespace std;
 
+string duration_string(long long int duration) {
+		std::stringstream out;
+		out << (duration / 1E9) << " seconds";
+		return out.str();
+	}
+	
+//read text file and construct graph with adjacency list
+csce::Graph load_from_file(const std::string& file_path) {
+	csce::Graph G;
+	
+		std::ifstream file(file_path, std::ios::in);
+		if(file.is_open()){
+			int n = 0;
+			file >> n;
+		
+		int x=0, y=0;
+			while(file >> x >> y){
+				G.add(csce::Vertex(x), csce::Vertex(y));
+		}
+		file.close();
+	}
+	
+	return G;
+}
+	
 int main(int argc, char **argv)
 {
     csce::Graph testGraph;
@@ -33,14 +73,40 @@ int main(int argc, char **argv)
     comp4.add(6,8).add(8,7).add(7,6);
     biconnectedComponents.push_back(comp4);
 
-    vector<size_t> articulationPoins;
-    articulationPoins.push_back(0);
-    articulationPoins.push_back(1);
-    articulationPoins.push_back(6);
-    
-    // run your algorithm and test it against the biconnectedComponents above
-    // your result should be the exact same number of components
-    // you can just use the "==" operator to check if two Graph components are the same
-
+    vector<csce::Vertex> testArtPoints;
+    testArtPoints.push_back(0);
+    testArtPoints.push_back(1);
+    testArtPoints.push_back(6);
+	
+	long long int duration = 0;
+	
+	int nthreads = std::thread::hardware_concurrency();
+	csce::Bicc bicc(nthreads);
+	
+	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+	//run the algorithm on the input, timing
+	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(testGraph);
+	std::cout << "-------------------------------------------" << std::endl;
+	std::cout << "Computing articulation vertices ... " << std::flush;
+	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_time - start_time).count();
+	
+	std::cout << "done in " << duration_string(duration) << std::endl;
+	
+	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
+	std::cout << "-------------------------------------------" << std::endl;
+	
+	for(csce::Vertex& v : outputArtPoints){
+		std::cout << v.str() << std::endl;
+	}
+	
+	//check correctness
+	if(outputArtPoints == testArtPoints){
+		std::cout << "Correct" << std::endl;
+		}
+		
+		else
+			std::cout << "Incorrect" << std::endl;
+	
 	return 0;
 }

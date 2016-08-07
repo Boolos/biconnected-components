@@ -3,6 +3,9 @@
 
 #include <string>
 #include <sstream>
+#include <queue>
+#include <list>
+#include <omp.h>
 #include "graph.hpp"
 #include "vertex.hpp"
 #include "edge.hpp"
