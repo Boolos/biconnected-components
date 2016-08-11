@@ -22,6 +22,10 @@ size_t Vertex::getId() const {
     return this->_id;
 }
 
+size_t &Vertex::setId(size_t id) {	
+	this->_id = id;
+}
+
 list<Vertex> Vertex::getNeighbors() const {
     return this->_neighbors;
 }

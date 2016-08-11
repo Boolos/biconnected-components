@@ -32,7 +32,7 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
     Graph tree;
 	
 	Vertex root = sparseGraph.getVertex(0);
-	root.parent->getId() == -1;
+	root.parent->setId(-1);
 	root.color = "white";
 	root.level = 0;
 	
@@ -57,7 +57,7 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
             {
                 neighbor.color = "gray";
                 neighbor.level = neighbor.level + 1;
-				neighbor.parent->getId() == neighbor.parent->getId() + 1;
+				neighbor.parent->setId(neighbor.parent->getId() + 1);
                 q.push(neighbor);
 				tree.add(neighbor);
             }
@@ -99,7 +99,7 @@ vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
 		xy[i] = make_pair(B[i].getU(), B[i].getV());
 		
 			if (xy[i].second.parent->getId() == xy[i].first.getId()) {
-				xy[i].second.parent->getId() == -1;
+				xy[i].second.parent->setId(-1);
 				components[i].add(xy[i].second);
 				list<Vertex> neighbors = xy[i].second.getNeighbors();
 				
