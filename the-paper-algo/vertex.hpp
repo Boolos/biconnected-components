@@ -18,7 +18,7 @@ namespace csce {
 		Vertex(size_t id);
         
         Vertex &addNeighbor(size_t id);
-		size_t &setId(size_t id);
+		//size_t &setId(size_t id);
         Vertex &addNeighbor(const Vertex& vertex);
         size_t getDegree() const; 
         size_t getId() const;
