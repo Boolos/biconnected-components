@@ -83,10 +83,10 @@ int main(int argc, char **argv)
 	
 	//int nthreads = std::thread::hardware_concurrency();
 	
-	int nthreads = 4; //the default number of threads. This can be changed by the -t runtime argument.
+	int nthreads = 1; //the default number of threads. This can be changed by the -t runtime argument.
 	std::string input_file_path; //where to load data from, if anywhere. If this is not specified, the data will be generated at runtime.
 	csce::Bicc bicc(nthreads);
-	
+	/*
 	int c;
 	while((c = getopt(argc, argv, "f:t:")) != -1){
 		switch(c){
@@ -103,14 +103,14 @@ int main(int argc, char **argv)
 				break;
 		}
 	}
-	
+	*/
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 	
-	//vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(testGraph);
+	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(testGraph);
 	
 	//run the algorithm on the input, timing
-	csce::Graph inputGraph = load_from_file (input_file_path);
-	vector<csce::Vertex> outputArticulationPoints = bicc.getArticulationPoints(inputGraph);
+	//csce::Graph inputGraph = load_from_file (input_file_path);
+	//vector<csce::Vertex> outputArticulationPoints = bicc.getArticulationPoints(inputGraph);
 	
 	std::cout << "-------------------------------------------" << std::endl;
 	std::cout << "Computing articulation vertices ... " << std::flush;
@@ -125,13 +125,13 @@ int main(int argc, char **argv)
 	for(csce::Vertex& v : outputArtPoints){
 		std::cout << v.str() << std::endl;
 	}
-	
+	*/
 	//check correctness
 	if(outputArtPoints == testArtPoints){
 		std::cout << "Correct" << std::endl;
 		}
 		else
 			std::cout << "Incorrect" << std::endl;
-	*/
+	
 	return 0;
 }

@@ -24,81 +24,72 @@ vector<Vertex> Bicc::getArticulationPoints(Graph& sparseGraph) {
     return artPoints;
 }
 
-//Step 1: BFS
-//Input: Graph G
-//Output: a Spanning Tree T, with array P(v) stores parent of v, and array L(v) stores the level
-//r, source and root, P(r) = -1, L(r) = 0
 Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
-    Graph tree;
+    Graph bfsTree;
 	
-	Vertex root = sparseGraph.getVertex(0);
-	Vertex parent(-1);
-	root.parent = &parent; 
-	root.color = "white";
-	root.level = 0;
-	
-	//do BFS, modify P and L along the way.
-    for(size_t i = 0; i < sparseGraph.getVertexCount(); i++){
-		sparseGraph.getVertex(i).color = "white";
+	//build adjacency list from sparseGraph
+	vector<Vertex> verticies = sparseGraph.getVerticies();
+	for(int i = 0; i < verticies.size(); i++){
+		bfsTree.add(verticies[i]);
+		verticies[i].color = "white";
 	}
-       
-    queue<Vertex> q;
-	list<Vertex> neighbors = root.getNeighbors();
-	root.color = "gray";
-    q.push(root);                   
+	
+    int lev;
+    lev = 0;
+	Vertex start = bfsTree.getRoot();
+    start.level = lev;
+    list<Vertex> VertexQueue;
+    VertexQueue.push_back(start);
  
-    while(!q.empty())
+    while (!VertexQueue.empty())    
     {
-        root = q.front();
-        q.pop();
- 
-        for(auto& neighbor : neighbors)
-        {
-            if(neighbor.color == "white")
-            {
-                neighbor.color = "gray";
-                neighbor.level = neighbor.level + 1;
-				Vertex n_parent(0);
-				neighbor.parent = &n_parent + 1;
-                q.push(neighbor);
-				tree.add(neighbor);
-            }
+        Vertex current = VertexQueue.front();
+		list<Vertex> neighbors = current.getNeighbors();
+		
+		//process all neighbors of current vertex
+        for(auto neighbor = neighbors.begin(); neighbor != neighbors.end(); neighbor++) {
+            if (neighbor->color == "white") {            // This is an unvisited vertex
+                neighbor->level = lev + 1;          // Set level
+                neighbor->parent = &current;       // Set parent
+                neighbor->color = "gray";
+				VertexQueue.push_back(*neighbor);    // Add it to the queue
+			}
+				
+				//if neighbor is gray, back edge(non tree), remove from bfstree, color black
+				else if (neighbor->color == "gray"){
+					bfsTree.remove(current, *neighbor);
+					neighbor->color = "black";
+				}	
         }
+        VertexQueue.pop_front();    // Pop out the processed vertex
+        ++lev;  // The next level
     }
-	//add tree edges to T.
-    return tree;
+    return bfsTree;
 }
 
-//Step 2: Getting Bridges
-//Input: Graph G, Spanning Tree T
-//Output: Vector of sub-Graphs Components  (G1, G2, ...)
-//LCA(w,v): lowest node which has both w,v as descendants.
 vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
     vector<Graph> components;
 
-	//for all e(w,v) in the G not in T, mark all non-tree edges until LCA (w,v)
 	Graph G_T = graph.difference(bfsTree);
 	vector<Edge> differenceGT = G_T.getEdges();
 	vector<pair<Vertex, Vertex>> wv;
 	vector<Edge> B;
-    for(int i = differenceGT.size(); i > 0; i--){
-		wv[i] = make_pair(differenceGT[i].getU(), differenceGT[i].getV());		
+    for(int i = differenceGT.size(); i = 0; i--){
+		wv.push_back(make_pair(differenceGT[i].getU(), differenceGT[i].getV()));		
 		if (wv[i].first.parent->getId() == wv[i].second.parent->getId()){
 			differenceGT[i].isBridge = false;
 			differenceGT[i].setLca(wv[i].first.parent->getId());
 		}
 		else {
-			//tree edges not marked are the bridges
+			
 			differenceGT[i].isBridge = true;
 			B.push_back(differenceGT[i]);
 		}
 	}
 
-	//for all e in T that are not marked, add them to B	
-	//for all e(x,y) in B, x = P(y), set P(y) = -1 to decompose G into vector of 2-edge-connected components 
 	vector<pair<Vertex, Vertex>> xy;
 	for(int i = 0; i < B.size(); i++) {
-		xy[i] = make_pair(B[i].getU(), B[i].getV());
+		xy.push_back(make_pair(B[i].getU(), B[i].getV()));
 		
 			if (xy[i].second.parent->getId() == xy[i].first.getId()) {
 				Vertex parent(-1);
