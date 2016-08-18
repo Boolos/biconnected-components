@@ -31,10 +31,13 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
 	vector<Vertex> verticies = sparseGraph.getVerticies();
 	for(int i = 0; i < verticies.size(); i++){
 		bfsTree.add(verticies[i]);
-		verticies[i].color = "white";
 	}
 	
-    int lev;
+	for(int i = 0; i < bfsTree.getVertexCount(); i++){
+		bfsTree.getVertex(i).color = "white";
+	}
+	
+    size_t lev;
     lev = 0;
 	Vertex start = bfsTree.getVertex(0);
     start.level = lev;
@@ -43,23 +46,26 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
  
     while (!VertexQueue.empty())    
     {
-        Vertex current = VertexQueue.front();
+        auto current = VertexQueue.front();
+        current.color = "gray"; //current vertex is being processed
 		list<Vertex> neighbors = current.getNeighbors();
 		
 		//process all neighbors of current vertex
-        for(auto neighbor = neighbors.begin(); neighbor != neighbors.end(); neighbor++) {
-            if (neighbor->color == "white") {            // This is an unvisited vertex
-                neighbor->level = lev + 1;          // Set level
-                neighbor->parent = &current;       // Set parent
-                neighbor->color = "gray";
+        for(auto& neighbor : neighbors) {
+        
+            //if neighbor is gray, back edge(non tree), remove from bfstree, color black
+			if (neighbor.color == "gray"){
+				bfsTree.remove(current, neighbor);
+				neighbor.color = "black";
+				break;
 			}
-				
-				//if neighbor is gray, back edge(non tree), remove from bfstree, color black
-				else if (neighbor->color == "gray"){
-					bfsTree.remove(current, *neighbor);
-					neighbor->color = "black";
-				}
-			VertexQueue.push_back(*neighbor);    // Add it to the queue	
+            
+            if (neighbor.color == "white") {   // This is an unvisited vertex
+                neighbor.level = lev + 1;          // Set level
+                neighbor.parent = &current;       // Set parent
+                neighbor.color = "gray";			// Set color visited
+                VertexQueue.push_back(neighbor);    // Add it to the queue	
+			}
         }
         VertexQueue.pop_front();    // Pop out the processed vertex
         ++lev;  // The next level

@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 	int nthreads = 1; //the default number of threads. This can be changed by the -t runtime argument.
 	std::string input_file_path; //where to load data from, if anywhere. If this is not specified, the data will be generated at runtime.
 	csce::Bicc bicc(nthreads);
-	
+	/*
 	int c;
 	while((c = getopt(argc, argv, "f:t:")) != -1){
 		switch(c){
@@ -67,9 +67,9 @@ int main(int argc, char **argv)
 				break;
 		}
 	}
-	
+	*/
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
-	
+	/*
 	//using input graph
 	csce::Graph inputGraph = load_from_file (input_file_path);
 	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(inputGraph);
@@ -88,9 +88,9 @@ int main(int argc, char **argv)
 	std::cout << "There were " << components.size() << " 2-edge-connected-components. " << std::endl;
 	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
 	std::cout << "-------------------------------------------" << std::endl;
-	
+	*/
 	//using test graph
-	/*
+	
 	    csce::Graph testGraph;
     testGraph.add(0,1).add(0,5).add(0,6)
         .add(1,2).add(1,3).add(1,4).add(1,0)
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
         .add(5,4).add(5,0)
         .add(6,0).add(6,8).add(6,7)
         .add(7,6).add(7,8)
-        .add(8,6).add(8,7).add(8,0);
+        .add(8,6).add(8,7);
 
     vector<csce::Graph> biconnectedComponents;
     
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	std::cout << "There were " << testGraph.getEdgeCount() << " input graph edges. " << std::endl;
 	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
 	std::cout << "There were " << bfsTree.getEdgeCount() << " bfsTree edges. " << std::endl;
-	std::cout << "There were " << components.size() << " components. " << std::endl;
+	std::cout << "There were " << components.size() << " 2-edge-connected components. " << std::endl;
 	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
 	std::cout << "-------------------------------------------" << std::endl;
 	
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 		}
 		else
 			std::cout << "Incorrect" << std::endl;
-	*/
+	
 	
 	return 0;
 }
