@@ -44,8 +44,54 @@ csce::Graph load_from_file(const std::string& file_path) {
 }
 	
 int main(int argc, char **argv)
-{
-    csce::Graph testGraph;
+{	
+	long long int duration = 0;
+	
+	int nthreads = 1; //the default number of threads. This can be changed by the -t runtime argument.
+	std::string input_file_path; //where to load data from, if anywhere. If this is not specified, the data will be generated at runtime.
+	csce::Bicc bicc(nthreads);
+	
+	int c;
+	while((c = getopt(argc, argv, "f:t:")) != -1){
+		switch(c){
+			case 'f':
+				if(optarg != NULL){
+					input_file_path = std::string(optarg);
+				}
+				break;
+				
+			case 't':
+				if(optarg != NULL){
+					nthreads = std::stoi(optarg);
+				}
+				break;
+		}
+	}
+	
+	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+	
+	//using input graph
+	csce::Graph inputGraph = load_from_file (input_file_path);
+	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(inputGraph);
+	std::cout << "-------------------------------------------" << std::endl;
+	std::cout << "Computing articulation vertices ... " << std::flush;
+	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_time - start_time).count();
+	
+	std::cout << "done in " << duration_string(duration) << std::endl;
+	csce::Graph bfsTree = bicc.breadthFirstSearch(inputGraph);
+	vector<csce::Graph> components = bicc.findBridges(inputGraph, bfsTree);
+	std::cout << "There were " << inputGraph.getVertexCount() << " input graph vertices. " << std::endl;
+	std::cout << "There were " << inputGraph.getEdgeCount() << " input graph edges. " << std::endl;
+	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
+	std::cout << "There were " << bfsTree.getEdgeCount() << " bfsTree edges. " << std::endl;
+	std::cout << "There were " << components.size() << " 2-edge-connected-components. " << std::endl;
+	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
+	std::cout << "-------------------------------------------" << std::endl;
+	
+	//using test graph
+	/*
+	    csce::Graph testGraph;
     testGraph.add(0,1).add(0,5).add(0,6)
         .add(1,2).add(1,3).add(1,4).add(1,0)
         .add(2,3).add(2,1)
@@ -54,7 +100,7 @@ int main(int argc, char **argv)
         .add(5,4).add(5,0)
         .add(6,0).add(6,8).add(6,7)
         .add(7,6).add(7,8)
-        .add(8,6).add(8,7);
+        .add(8,6).add(8,7).add(8,0);
 
     vector<csce::Graph> biconnectedComponents;
     
@@ -78,39 +124,8 @@ int main(int argc, char **argv)
     testArtPoints.push_back(0);
     testArtPoints.push_back(1);
     testArtPoints.push_back(6);
-	
-	long long int duration = 0;
-	
-	//int nthreads = std::thread::hardware_concurrency();
-	
-	int nthreads = 1; //the default number of threads. This can be changed by the -t runtime argument.
-	std::string input_file_path; //where to load data from, if anywhere. If this is not specified, the data will be generated at runtime.
-	csce::Bicc bicc(nthreads);
-	/*
-	int c;
-	while((c = getopt(argc, argv, "f:t:")) != -1){
-		switch(c){
-			case 'f':
-				if(optarg != NULL){
-					input_file_path = std::string(optarg);
-				}
-				break;
-				
-			case 't':
-				if(optarg != NULL){
-					nthreads = std::stoi(optarg);
-				}
-				break;
-		}
-	}
-	*/
-	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
-	
+    
 	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(testGraph);
-	
-	//run the algorithm on the input, timing
-	//csce::Graph inputGraph = load_from_file (input_file_path);
-	//vector<csce::Vertex> outputArticulationPoints = bicc.getArticulationPoints(inputGraph);
 	
 	std::cout << "-------------------------------------------" << std::endl;
 	std::cout << "Computing articulation vertices ... " << std::flush;
@@ -118,20 +133,23 @@ int main(int argc, char **argv)
 	duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_time - start_time).count();
 	
 	std::cout << "done in " << duration_string(duration) << std::endl;
+	csce::Graph bfsTree = bicc.breadthFirstSearch(testGraph);
+	vector<csce::Graph> components = bicc.findBridges(testGraph, bfsTree);
+	std::cout << "There were " << testGraph.getVertexCount() << " input graph vertices. " << std::endl;
+	std::cout << "There were " << testGraph.getEdgeCount() << " input graph edges. " << std::endl;
+	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
+	std::cout << "There were " << bfsTree.getEdgeCount() << " bfsTree edges. " << std::endl;
+	std::cout << "There were " << components.size() << " components. " << std::endl;
 	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
 	std::cout << "-------------------------------------------" << std::endl;
 	
-	/*
-	for(csce::Vertex& v : outputArtPoints){
-		std::cout << v.str() << std::endl;
-	}
-	*/
 	//check correctness
 	if(outputArtPoints == testArtPoints){
 		std::cout << "Correct" << std::endl;
 		}
 		else
 			std::cout << "Incorrect" << std::endl;
+	*/
 	
 	return 0;
 }

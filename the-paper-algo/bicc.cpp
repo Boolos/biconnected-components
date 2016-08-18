@@ -36,7 +36,7 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
 	
     int lev;
     lev = 0;
-	Vertex start = bfsTree.getRoot();
+	Vertex start = bfsTree.getVertex(0);
     start.level = lev;
     list<Vertex> VertexQueue;
     VertexQueue.push_back(start);
@@ -52,14 +52,14 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
                 neighbor->level = lev + 1;          // Set level
                 neighbor->parent = &current;       // Set parent
                 neighbor->color = "gray";
-				VertexQueue.push_back(*neighbor);    // Add it to the queue
 			}
 				
 				//if neighbor is gray, back edge(non tree), remove from bfstree, color black
 				else if (neighbor->color == "gray"){
 					bfsTree.remove(current, *neighbor);
 					neighbor->color = "black";
-				}	
+				}
+			VertexQueue.push_back(*neighbor);    // Add it to the queue	
         }
         VertexQueue.pop_front();    // Pop out the processed vertex
         ++lev;  // The next level
