@@ -20,11 +20,11 @@ Vertex Edge::getV() const {
 }
 
 Vertex Edge::setLca(size_t lca) {
-    this->setLca(Vertex(lca));
+    return this->setLca(Vertex(lca));
 }
 
 Vertex Edge::setLca(const Vertex lca) {
-    this->_lca = lca;
+    return this->_lca = lca;
 }
         
 string Edge::str() const {

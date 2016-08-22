@@ -13,7 +13,7 @@ vector<Vertex> Bicc::getArticulationPoints(Graph& sparseGraph) {
     // each non tree edge should be marked
     auto bfsTree = this->breadthFirstSearch(sparseGraph);
 
-    // Mark bridges on sparse graph 
+    // Mark bridges on sparse graph, bridge = non-tree edge not on any cycle 
     // each non tree edge should have its least common ancestor marked 
     // each component is a subgraph of the sparse graph that has been disconnected by removing the bridges
     auto components = findBridges(sparseGraph, bfsTree);
@@ -25,89 +25,97 @@ vector<Vertex> Bicc::getArticulationPoints(Graph& sparseGraph) {
 }
 
 Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
-    Graph bfsTree;
-	
-	//build adjacency list from sparseGraph
+    Graph bfsTree;	
+	auto lev = 0;
+    
+	//initialize
 	vector<Vertex> verticies = sparseGraph.getVerticies();
 	for(int i = 0; i < verticies.size(); i++){
-		bfsTree.add(verticies[i]);
+		verticies[i].color = "white";
+		verticies[i].level = lev;
 	}
 	
-	for(int i = 0; i < bfsTree.getVertexCount(); i++){
-		bfsTree.getVertex(i).color = "white";
-	}
-	
-    size_t lev;
-    lev = 0;
-	Vertex start = bfsTree.getVertex(0);
-    start.level = lev;
-    list<Vertex> VertexQueue;
-    VertexQueue.push_back(start);
+	Vertex start = verticies[0];
+    queue<Vertex> VertexQueue;
+    VertexQueue.push(start);
  
     while (!VertexQueue.empty())    
     {
-        auto current = VertexQueue.front();
+        Vertex current = VertexQueue.front();
         current.color = "gray"; //current vertex is being processed
-		list<Vertex> neighbors = current.getNeighbors();
+		auto neighbors = current.getNeighbors();
 		
 		//process all neighbors of current vertex
-        for(auto& neighbor : neighbors) {
-        
-            //if neighbor is gray, back edge(non tree), remove from bfstree, color black
-			if (neighbor.color == "gray"){
-				bfsTree.remove(current, neighbor);
-				neighbor.color = "black";
-				break;
+        for(auto& n : neighbors) {
+        	
+            if (n.color == "white") {   // This is an unvisited vertex
+                n.level = lev + 1;          // Set level
+                n.parent = &current;       // Set parent
+                n.color = "gray";			// Set color visited
+            	continue;  	
 			}
+			
+			bfsTree.add(current, n); //add the edge to bfsTree
+            VertexQueue.push(n);    // Add it to the queue
             
-            if (neighbor.color == "white") {   // This is an unvisited vertex
-                neighbor.level = lev + 1;          // Set level
-                neighbor.parent = &current;       // Set parent
-                neighbor.color = "gray";			// Set color visited
-                VertexQueue.push_back(neighbor);    // Add it to the queue	
-			}
         }
-        VertexQueue.pop_front();    // Pop out the processed vertex
-        ++lev;  // The next level
-    }
+        VertexQueue.pop();    // Pop out the processed vertex
+        lev++;  // The next level
+        
+    } 
+    
     return bfsTree;
 }
 
 vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
-    vector<Graph> components;
 
-	Graph G_T = graph.difference(bfsTree);
-	vector<Edge> differenceGT = G_T.getEdges();
+    vector<Graph> components;
+	vector<Edge> graph_edges = graph.getEdges();
+	Graph diffGT = graph.difference(bfsTree);
+	vector<Edge> diffGT_edges = diffGT.getEdges();
 	vector<pair<Vertex, Vertex>> wv;
-	vector<Edge> B;
-    for(int i = differenceGT.size(); i = 0; i--){
-		wv.push_back(make_pair(differenceGT[i].getU(), differenceGT[i].getV()));		
-		if (wv[i].first.parent->getId() == wv[i].second.parent->getId()){
-			differenceGT[i].isBridge = false;
-			differenceGT[i].setLca(wv[i].first.parent->getId());
-		}
-		else {
+	vector<Edge> Bridges;
+	
+	for(int i = 0; i < graph_edges.size(); i++) {
+			graph_edges[i].isBridge = true;
+	}
+	/*
+    for(int i = 0; i < diffGT_edges.size(); i++){
+		Vertex w = diffGT_edges[i].getU();
+		Vertex v = diffGT_edges[i].getV();
+				
+		if (w.parent->getId() != v.parent->getId()){
+			continue;
+			}
 			
-			differenceGT[i].isBridge = true;
-			B.push_back(differenceGT[i]);
-		}
+			diffGT_edges[i].isBridge = false;
+			diffGT_edges[i].setLca(wv[i].first.parent->getId());
+	}*/
+	
+	for(int i = 0; i < graph_edges.size(); i++) {
+			if (graph_edges[i].isBridge == true)
+			Bridges.push_back(graph_edges[i]);
 	}
 
 	vector<pair<Vertex, Vertex>> xy;
-	for(int i = 0; i < B.size(); i++) {
-		xy.push_back(make_pair(B[i].getU(), B[i].getV()));
+	for(int i = 0; i < Bridges.size(); i++) {
+		xy.push_back(make_pair(Bridges[i].getU(), Bridges[i].getV()));
 		
 			if (xy[i].second.parent->getId() == xy[i].first.getId()) {
+				continue;
+				}
+				
 				Vertex parent(-1);
 				xy[i].second.parent = &parent; 
+				
 				components[i].add(xy[i].second);
 				list<Vertex> neighbors = xy[i].second.getNeighbors();
 				
 				for(auto& neighbor : neighbors){				
 					if(neighbor.parent->getId() == xy[i].second.getId()){
-						components[i].add(neighbor);
+						continue;
 					}
-				}
+				components[i].add(neighbor);
 			}
 		}
 

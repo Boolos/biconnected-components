@@ -31,6 +31,11 @@ bool Vertex::hasNeighbor(size_t id) const {
 }
 
 bool Vertex::hasNeighbor(const Vertex& vertex) const {
+	return std::find(_neighbors.begin(), _neighbors.end(), vertex) != _neighbors.end();
+}
+
+/*
+bool Vertex::hasNeighbor(const Vertex& vertex) const {
     auto neighbor = this->_neighbors.begin();
     for (neighbor; neighbor != this->_neighbors.end(); neighbor++) {
         if (*neighbor == vertex) {
@@ -39,7 +44,7 @@ bool Vertex::hasNeighbor(const Vertex& vertex) const {
     }
     return neighbor != this->_neighbors.end();
 } 
-
+*/
 Vertex &Vertex::removeNeighbor(size_t id) {
     this->removeNeighbor(Vertex(id));
     return *this;

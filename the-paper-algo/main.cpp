@@ -50,6 +50,8 @@ int main(int argc, char **argv)
 	int nthreads = 1; //the default number of threads. This can be changed by the -t runtime argument.
 	std::string input_file_path; //where to load data from, if anywhere. If this is not specified, the data will be generated at runtime.
 	csce::Bicc bicc(nthreads);
+	
+	//using input graph
 	/*
 	int c;
 	while((c = getopt(argc, argv, "f:t:")) != -1){
@@ -67,10 +69,9 @@ int main(int argc, char **argv)
 				break;
 		}
 	}
-	*/
+	
 	std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
-	/*
-	//using input graph
+	
 	csce::Graph inputGraph = load_from_file (input_file_path);
 	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(inputGraph);
 	std::cout << "-------------------------------------------" << std::endl;
@@ -81,11 +82,14 @@ int main(int argc, char **argv)
 	std::cout << "done in " << duration_string(duration) << std::endl;
 	csce::Graph bfsTree = bicc.breadthFirstSearch(inputGraph);
 	vector<csce::Graph> components = bicc.findBridges(inputGraph, bfsTree);
+	csce::Graph G_T = inputGraph.difference(bfsTree);
 	std::cout << "There were " << inputGraph.getVertexCount() << " input graph vertices. " << std::endl;
 	std::cout << "There were " << inputGraph.getEdgeCount() << " input graph edges. " << std::endl;
 	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
 	std::cout << "There were " << bfsTree.getEdgeCount() << " bfsTree edges. " << std::endl;
-	std::cout << "There were " << components.size() << " 2-edge-connected-components. " << std::endl;
+	std::cout << "There were " << G_T.getVertexCount() << " inputGraph - bfsTree vertices. " << std::endl;
+	std::cout << "There were " << G_T.getEdgeCount() << " inputGraph - bfsTree edges. " << std::endl;
+	std::cout << "There were " << components.size() << " components by removing bridges. " << std::endl;
 	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
 	std::cout << "-------------------------------------------" << std::endl;
 	*/
@@ -125,6 +129,7 @@ int main(int argc, char **argv)
     testArtPoints.push_back(1);
     testArtPoints.push_back(6);
     
+    std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(testGraph);
 	
 	std::cout << "-------------------------------------------" << std::endl;
@@ -135,11 +140,14 @@ int main(int argc, char **argv)
 	std::cout << "done in " << duration_string(duration) << std::endl;
 	csce::Graph bfsTree = bicc.breadthFirstSearch(testGraph);
 	vector<csce::Graph> components = bicc.findBridges(testGraph, bfsTree);
-	std::cout << "There were " << testGraph.getVertexCount() << " input graph vertices. " << std::endl;
-	std::cout << "There were " << testGraph.getEdgeCount() << " input graph edges. " << std::endl;
+	csce::Graph G_T = testGraph.difference(bfsTree);
+	std::cout << "There were " << testGraph.getVertexCount() << " inputGraph vertices. " << std::endl;
+	std::cout << "There were " << testGraph.getEdgeCount() << " inputGraph edges. " << std::endl;
 	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
 	std::cout << "There were " << bfsTree.getEdgeCount() << " bfsTree edges. " << std::endl;
-	std::cout << "There were " << components.size() << " 2-edge-connected components. " << std::endl;
+	std::cout << "There were " << G_T.getVertexCount() << " inputGraph - bfsTree vertices. " << std::endl;
+	std::cout << "There were " << G_T.getEdgeCount() << " inputGraph - bfsTree edges. " << std::endl;
+	std::cout << "There were " << components.size() << " components by removing bridges. " << std::endl;
 	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
 	std::cout << "-------------------------------------------" << std::endl;
 	
