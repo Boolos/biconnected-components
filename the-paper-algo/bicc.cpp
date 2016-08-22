@@ -48,22 +48,18 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
 		//process all neighbors of current vertex
         for(auto& n : neighbors) {
         	
-            if (n.color == "white") {   // This is an unvisited vertex
-                n.level = lev + 1;          // Set level
-                n.parent = &current;       // Set parent
-                n.color = "gray";			// Set color visited
-            	continue;  	
-			}
-			
-			bfsTree.add(current, n); //add the edge to bfsTree
-            VertexQueue.push(n);    // Add it to the queue
-            
+            if (n.color == "white") {   // This is an unvisited vertex   	
+				bfsTree.add(current, n); //add the edge to bfsTree
+				VertexQueue.push(n);    // Add it to the queue
+				n.level = lev + 1;          // Set level
+				n.parent = &current;       // Set parent
+				n.color = "gray";			// Set color visited			
+            }
         }
+		
         VertexQueue.pop();    // Pop out the processed vertex
-        lev++;  // The next level
-        
+        //lev++;  // The next level
     } 
-    
     return bfsTree;
 }
 
@@ -77,42 +73,44 @@ vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
 	vector<Edge> Bridges;
 	
 	for(int i = 0; i < graph_edges.size(); i++) {
-			graph_edges[i].isBridge = true;
+		graph_edges[i].isBridge = true;
 	}
-	/*
+	
+	//compute lca, mark non-bridges
     for(int i = 0; i < diffGT_edges.size(); i++){
 		Vertex w = diffGT_edges[i].getU();
 		Vertex v = diffGT_edges[i].getV();
 				
-		if (w.parent->getId() != v.parent->getId()){
-			continue;
-			}
-			
+		if (w.level > v.level){
 			diffGT_edges[i].isBridge = false;
-			diffGT_edges[i].setLca(wv[i].first.parent->getId());
-	}*/
+			diffGT_edges[i].setLca(w.parent->getId());
+		}
+		
+		else {
+			diffGT_edges[i].isBridge = false;
+			diffGT_edges[i].setLca(v.parent->getId());
+		}
+	}
 	
 	for(int i = 0; i < graph_edges.size(); i++) {
 			if (graph_edges[i].isBridge == true)
 			Bridges.push_back(graph_edges[i]);
 	}
-
+	
+	//adding components by removing bridges
 	vector<pair<Vertex, Vertex>> xy;
 	for(int i = 0; i < Bridges.size(); i++) {
 		xy.push_back(make_pair(Bridges[i].getU(), Bridges[i].getV()));
 		
-			if (xy[i].second.parent->getId() == xy[i].first.getId()) {
+			if (xy[i].second.parent != &xy[i].first) {
 				continue;
 				}
-				
-				Vertex parent(-1);
-				xy[i].second.parent = &parent; 
 				
 				components[i].add(xy[i].second);
 				list<Vertex> neighbors = xy[i].second.getNeighbors();
 				
 				for(auto& neighbor : neighbors){				
-					if(neighbor.parent->getId() == xy[i].second.getId()){
+					if(neighbor.parent != &xy[i].second){
 						continue;
 					}
 				components[i].add(neighbor);
