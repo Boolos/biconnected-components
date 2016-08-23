@@ -3,7 +3,10 @@
 using namespace csce;
 using namespace std;
 
-Vertex::Vertex(size_t id) : _id(id) { }
+Vertex::Vertex(size_t id) : _id(id) {
+	this->color = "white";
+	this->level = 0;
+}
 
 Vertex &Vertex::addNeighbor(size_t id) {
     return this->addNeighbor(Vertex(id));

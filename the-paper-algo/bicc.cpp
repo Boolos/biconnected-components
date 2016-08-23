@@ -26,14 +26,7 @@ vector<Vertex> Bicc::getArticulationPoints(Graph& sparseGraph) {
 
 Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
     Graph bfsTree;	
-	auto lev = 0;
-    
-	//initialize
 	vector<Vertex> verticies = sparseGraph.getVerticies();
-	for(int i = 0; i < verticies.size(); i++){
-		verticies[i].color = "white";
-		verticies[i].level = lev;
-	}
 	
 	Vertex start = verticies[0];
     queue<Vertex> VertexQueue;
@@ -47,18 +40,20 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
 		
 		//process all neighbors of current vertex
         for(auto& n : neighbors) {
-        	
+        	cout << n.color << endl;
             if (n.color == "white") {   // This is an unvisited vertex   	
+				
+				n.level = n.level + 1;          // Set level
+				n.parent = &current;       // Set parent
+				n.color = "gray";			// Set color visited
 				bfsTree.add(current, n); //add the edge to bfsTree
 				VertexQueue.push(n);    // Add it to the queue
-				n.level = lev + 1;          // Set level
-				n.parent = &current;       // Set parent
-				n.color = "gray";			// Set color visited			
+				cout << n.color << endl;
+				cout << n.level << endl;			
             }
         }
-		
+		cout << bfsTree.getVertexCount() << endl;
         VertexQueue.pop();    // Pop out the processed vertex
-        //lev++;  // The next level
     } 
     return bfsTree;
 }
