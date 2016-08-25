@@ -78,15 +78,16 @@ vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
 				
 		if (w.level > v.level){
 			diffGT_edges[i].isBridge = false;
-			diffGT_edges[i].setLca(w.parent->getId());
+			//diffGT_edges[i].setLca(w.parent->getId());
 		}
 		
 		else {
 			diffGT_edges[i].isBridge = false;
-			diffGT_edges[i].setLca(v.parent->getId());
+			//diffGT_edges[i].setLca(v.parent->getId());
 		}
 	}
 	
+	//saving all bridges
 	for(int i = 0; i < graph_edges.size(); i++) {
 			if (graph_edges[i].isBridge == true)
 			Bridges.push_back(graph_edges[i]);
@@ -101,14 +102,14 @@ vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
 				continue;
 				}
 				
-				components[i].add(xy[i].second);
+				//components[i].add(xy[i].second);
 				list<Vertex> neighbors = xy[i].second.getNeighbors();
 				
 				for(auto& neighbor : neighbors){				
 					if(neighbor.parent != &xy[i].second){
 						continue;
 					}
-				components[i].add(neighbor);
+				//components[i].add(neighbor);
 			}
 		}
 

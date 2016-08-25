@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	csce::Bicc bicc(nthreads);
 	
 	//using input graph
-	
+	/*
 	int c;
 	while((c = getopt(argc, argv, "f:t:")) != -1){
 		switch(c){
@@ -74,6 +74,7 @@ int main(int argc, char **argv)
 	
 	csce::Graph inputGraph = load_from_file (input_file_path);
 	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(inputGraph);
+	std::cout << "-------------------------------------------" << std::endl;
 	std::cout << "Computing articulation vertices ... " << std::flush;
 	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_time - start_time).count();
@@ -82,6 +83,81 @@ int main(int argc, char **argv)
 	csce::Graph bfsTree = bicc.breadthFirstSearch(inputGraph);
 	vector<csce::Graph> components = bicc.findBridges(inputGraph, bfsTree);
 	csce::Graph G_T = inputGraph.difference(bfsTree);
+	std::cout << "There were " << inputGraph.getVertexCount() << " input graph vertices. " << std::endl;
+	std::cout << "There were " << inputGraph.getEdgeCount() << " input graph edges. " << std::endl;
+	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
+	std::cout << "There were " << bfsTree.getEdgeCount() << " bfsTree edges. " << std::endl;
+	std::cout << "There were " << G_T.getVertexCount() << " inputGraph - bfsTree vertices. " << std::endl;
+	std::cout << "There were " << G_T.getEdgeCount() << " inputGraph - bfsTree edges. " << std::endl;
+	std::cout << "There were " << components.size() << " components by removing bridges. " << std::endl;
+	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
+	std::cout << "-------------------------------------------" << std::endl;
+	*/
+	//using test graph
+	
+	    csce::Graph testGraph;
+    testGraph.add(0,1).add(0,5).add(0,6)
+        .add(1,2).add(1,3).add(1,4).add(1,0)
+        .add(2,3).add(2,1)
+        .add(3,2).add(3,1)
+        .add(4,1).add(4,5)
+        .add(5,4).add(5,0)
+        .add(6,0).add(6,8).add(6,7)
+        .add(7,6).add(7,8)
+        .add(8,6).add(8,7);
+
+    vector<csce::Graph> biconnectedComponents;
+    
+    csce::Graph comp1;
+    comp1.add(1,2).add(2,3).add(3,1);
+    biconnectedComponents.push_back(comp1);
+    
+    csce::Graph comp2;
+    comp2.add(1,4).add(4,5).add(5,0).add(0,1);
+    biconnectedComponents.push_back(comp2);
+
+    csce::Graph comp3;
+    comp3.add(0,6);
+    biconnectedComponents.push_back(comp3);
+
+    csce::Graph comp4;
+    comp4.add(6,8).add(8,7).add(7,6);
+    biconnectedComponents.push_back(comp4);
+
+    vector<csce::Vertex> testArtPoints;
+    testArtPoints.push_back(0);
+    testArtPoints.push_back(1);
+    testArtPoints.push_back(6);
+    
+    std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+	vector<csce::Vertex> outputArtPoints = bicc.getArticulationPoints(testGraph);
+	
+	std::cout << "-------------------------------------------" << std::endl;
+	std::cout << "Computing articulation vertices ... " << std::flush;
+	std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_time - start_time).count();
+	
+	std::cout << "done in " << duration_string(duration) << std::endl;
+	csce::Graph bfsTree = bicc.breadthFirstSearch(testGraph);
+	vector<csce::Graph> components = bicc.findBridges(testGraph, bfsTree);
+	csce::Graph G_T = testGraph.difference(bfsTree);
+	std::cout << "There were " << testGraph.getVertexCount() << " inputGraph vertices. " << std::endl;
+	std::cout << "There were " << testGraph.getEdgeCount() << " inputGraph edges. " << std::endl;
+	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
+	std::cout << "There were " << bfsTree.getEdgeCount() << " bfsTree edges. " << std::endl;
+	std::cout << "There were " << G_T.getVertexCount() << " inputGraph - bfsTree vertices. " << std::endl;
+	std::cout << "There were " << G_T.getEdgeCount() << " inputGraph - bfsTree edges. " << std::endl;
+	std::cout << "There were " << components.size() << " components by removing bridges. " << std::endl;
+	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
+	std::cout << "-------------------------------------------" << std::endl;
+	
+	//check correctness
+	if(outputArtPoints == testArtPoints){
+		std::cout << "Correct" << std::endl;
+		}
+		else
+			std::cout << "Incorrect" << std::endl;
+	
 	
 	return 0;
 }
