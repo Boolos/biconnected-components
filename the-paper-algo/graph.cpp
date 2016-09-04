@@ -300,6 +300,34 @@ Graph &Graph::remove(const Edge& edge) {
     return *this;
 }
 
+void Graph::updateVertex(size_t id, string color) {
+    auto u = this->_findVertex(Vertex(id));
+    if (u == this->_verticies.end()) {
+        return;
+    }
+
+    u->color = color;
+}
+
+void Graph::updateVertex(size_t id, size_t level) {
+    auto u = this->_findVertex(Vertex(id));
+    if (u == this->_verticies.end()) {
+        return;
+    }
+
+    u->level = level;
+}
+
+void Graph::updateVertex(size_t id, size_t level, string color) {
+    auto u = this->_findVertex(Vertex(id));
+    if (u == this->_verticies.end()) {
+        return;
+    }
+
+    u->level = level;
+    u->color = color;
+}
+
 vector<Vertex>::iterator Graph::_findVertex(const Vertex& vertex) {
     for (auto it = this->_verticies.begin(); it != this->_verticies.end(); it++) {
         if (*it == vertex) {

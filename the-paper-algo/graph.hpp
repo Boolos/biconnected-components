@@ -57,6 +57,9 @@ namespace csce {
 		Graph &remove(const Vertex& u, const Vertex& v);
 		Graph &remove(const Edge& edge);
 
+        void updateVertex(size_t id, string color);
+        void updateVertex(size_t id, size_t level);
+        void updateVertex(size_t id, size_t level, string color);
 
 		bool operator ==(const Graph& other) const {
             if (this->getVertexCount() != other.getVertexCount()) {
