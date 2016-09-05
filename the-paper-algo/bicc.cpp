@@ -28,6 +28,11 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
     Graph bfsTree;	
 	vector<Vertex> verticies = sparseGraph.getVerticies();
 	
+	//cout << "before= " << verticies[0].color << " " << verticies[0].level << endl;
+	//sparseGraph.updateVertex(0, "black");
+	//sparseGraph.updateVertex(0, 2);
+	//cout << "after= " << verticies[0].color << " " << verticies[0].level << endl;
+	
 	Vertex start = verticies[0];
     queue<Vertex> VertexQueue;
     VertexQueue.push(start);
@@ -35,24 +40,24 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
     while (!VertexQueue.empty())    
     {
         Vertex current = VertexQueue.front();
-        current.color = "gray"; //current vertex is being processed
+        sparseGraph.updateVertex(current.getId(), "gray"); //current vertex is being processed
 		auto neighbors = current.getNeighbors();
 		
 		//process all neighbors of current vertex
         for(auto& n : neighbors) {
-        	cout << n.color << endl;
+        	//cout << n.color << endl;
             if (n.color == "white") {   // This is an unvisited vertex   	
 				
-				n.level = n.level + 1;          // Set level
-				n.parent = &current;       // Set parent
-				n.color = "gray";			// Set color visited
-				bfsTree.add(current, n); //add the edge to bfsTree
+				sparseGraph.updateVertex(n.getId(), n.level + 1);          // Set level
+				sparseGraph.updateVertex(n.getId(), current);       // Set parent
+				sparseGraph.updateVertex(n.getId(), "gray");			// Set color visited
+				bfsTree.add(current.getId(), n.getId()); //add the edge to bfsTree
 				VertexQueue.push(n);    // Add it to the queue
-				cout << n.color << endl;
-				cout << n.level << endl;			
+				//cout << n.color << endl;
+				//cout << n.level << endl;			
             }
         }
-		cout << bfsTree.getVertexCount() << endl;
+		//cout << bfsTree.getVertexCount() << endl;
         VertexQueue.pop();    // Pop out the processed vertex
     } 
     return bfsTree;

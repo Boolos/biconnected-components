@@ -29,6 +29,16 @@ list<Vertex> Vertex::getNeighbors() const {
     return this->_neighbors;
 }
 
+/*
+list<Vertex> Vertex::getNeighbors() const {
+ auto u = this->_findVertex(Vertex(id));
+    if (u == this->_verticies.end()) {
+        return;
+    }
+
+    u->level = level;
+}
+*/
 bool Vertex::hasNeighbor(size_t id) const {
     return this->hasNeighbor(Vertex(id));
 }

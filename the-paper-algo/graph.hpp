@@ -59,6 +59,7 @@ namespace csce {
 
         void updateVertex(size_t id, string color);
         void updateVertex(size_t id, size_t level);
+        void updateVertex(size_t id, Vertex parent);
         void updateVertex(size_t id, size_t level, string color);
 
 		bool operator ==(const Graph& other) const {

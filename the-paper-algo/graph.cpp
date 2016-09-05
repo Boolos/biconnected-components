@@ -318,6 +318,15 @@ void Graph::updateVertex(size_t id, size_t level) {
     u->level = level;
 }
 
+void Graph::updateVertex(size_t id, Vertex parent) {
+    auto u = this->_findVertex(Vertex(id));
+    if (u == this->_verticies.end()) {
+        return;
+    }
+
+    u->parent = &parent;
+}
+
 void Graph::updateVertex(size_t id, size_t level, string color) {
     auto u = this->_findVertex(Vertex(id));
     if (u == this->_verticies.end()) {
