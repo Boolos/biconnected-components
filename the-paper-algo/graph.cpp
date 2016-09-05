@@ -195,6 +195,14 @@ vector<Edge> Graph::getEdges(const Vertex& incident) const {
     return edges;
 }
 
+void Graph::updateEdge(size_t uId, size_t vId, bool isBridge){
+	auto edge = this->_findEdge(Edge(uId, vId));
+    if (edge == this->_edges.end()) {
+        return;
+    }
+    edge->isBridge = isBridge;
+}
+
 Vertex Graph::getRoot() const {
     return this->_root;
 }
@@ -353,4 +361,22 @@ vector<Vertex>::const_iterator Graph::_findVertex(const Vertex& vertex) const {
         }
     }
     return this->_verticies.cend();
+}
+
+vector<Edge>::iterator Graph::_findEdge(const Edge& edge) {
+    for (auto it = this->_edges.begin(); it != this->_edges.end(); it++) {
+        if (*it == edge) {
+            return it;
+        }
+    }
+    return this->_edges.end();
+}
+
+vector<Edge>::const_iterator Graph::_findEdge(const Edge& edge) const {
+    for (auto it = this->_edges.cbegin(); it != this->_edges.cend(); it++) {
+        if (*it == edge) {
+            return it;
+        }
+    }
+    return this->_edges.cend();
 }

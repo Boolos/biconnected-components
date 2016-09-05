@@ -71,27 +71,27 @@ vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
 	vector<Edge> diffGT_edges = diffGT.getEdges();
 	vector<pair<Vertex, Vertex>> wv;
 	vector<Edge> Bridges;
-	
-	for(int i = 0; i < graph_edges.size(); i++) {
-		graph_edges[i].isBridge = true;
-	}
+
+	cout << "isBridge before= " << graph_edges[0].isBridge << endl;
+	graph.updateEdge(graph_edges[0].getU().getId(), graph_edges[0].getV().getId(), false);
+	cout << "isBridge after= " << graph_edges[0].isBridge << endl;
 	
 	//compute lca, mark non-bridges
     for(int i = 0; i < diffGT_edges.size(); i++){
 		Vertex w = diffGT_edges[i].getU();
 		Vertex v = diffGT_edges[i].getV();
-				
+		
 		if (w.level > v.level){
-			diffGT_edges[i].isBridge = false;
+			graph.updateEdge(w.getId(), v.getId(), false);
 			//diffGT_edges[i].setLca(w.parent->getId());
 		}
 		
 		else {
-			diffGT_edges[i].isBridge = false;
+			//graph.updateEdge(w.getId(), v.getId(), false);
 			//diffGT_edges[i].setLca(v.parent->getId());
 		}
 	}
-	
+			
 	//saving all bridges
 	for(int i = 0; i < graph_edges.size(); i++) {
 			if (graph_edges[i].isBridge == true)

@@ -39,6 +39,7 @@ namespace csce {
         vector<Edge> getEdges() const;
         vector<Edge> getEdges(size_t id) const;
         vector<Edge> getEdges(const Vertex& incident) const;
+        void updateEdge(size_t uId, size_t vId, bool isBridge);
 
         Vertex getRoot() const;
 
@@ -91,6 +92,9 @@ namespace csce {
         vector<Vertex> _verticies;
         vector<Vertex>::iterator _findVertex(const Vertex& vertex);
         vector<Vertex>::const_iterator _findVertex(const Vertex& vertex) const;
+        vector<Edge> _edges;
+        vector<Edge>::iterator _findEdge(const Edge& edge);
+        vector<Edge>::const_iterator _findEdge(const Edge& edge) const;
         Vertex _root;
 	};
 }
