@@ -42,7 +42,7 @@ namespace csce {
 		}
 	private:
 		size_t _id;
-        list<Vertex> _neighbors;
+        mutable list<Vertex> _neighbors;
 	};
 }
 

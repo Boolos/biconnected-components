@@ -26,33 +26,38 @@ vector<Vertex> Bicc::getArticulationPoints(Graph& sparseGraph) {
 
 Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
     Graph bfsTree;	
-	vector<Vertex> verticies = sparseGraph.getVerticies();
-	
-	//cout << "before= " << verticies[0].color << " " << verticies[0].level << endl;
+    
+    //testing - debugging
+	cout << "before= " << sparseGraph.getVertex(0).color << " " << sparseGraph.getVertex(0).level << endl;
 	//sparseGraph.updateVertex(0, "black");
 	//sparseGraph.updateVertex(0, 2);
-	//cout << "after= " << verticies[0].color << " " << verticies[0].level << endl;
+	//cout << "after= " << sparseGraph.getVertex(0).color << " " << sparseGraph.getVertex(0).level << endl;
 	
-	Vertex start = verticies[0];
+	//Vertex start = sparseGraph.getVertex(0);
     queue<Vertex> VertexQueue;
-    VertexQueue.push(start);
+    VertexQueue.push(sparseGraph.getVertex(0));
  
     while (!VertexQueue.empty())    
     {
-        Vertex current = VertexQueue.front();
-        sparseGraph.updateVertex(current.getId(), "gray"); //current vertex is being processed
-		auto neighbors = current.getNeighbors();
-		
+        //Vertex current = VertexQueue.front();
+        //cout << "start queue" << endl;
+        //cout << VertexQueue.front().color << endl;
+        sparseGraph.updateVertex(VertexQueue.front().getId(), "gray"); //current vertex is being processed
+		auto neighbors = VertexQueue.front().getNeighbors();
+		//const_cast <list<Vertex>&> (neighbors);
+		cout << VertexQueue.front().color << endl;
 		//process all neighbors of current vertex
-        for(auto& n : neighbors) {
+        for(auto n : neighbors) {
+        	//cout << n.color << endl;
         	//cout << n.color << endl;
             if (n.color == "white") {   // This is an unvisited vertex   	
-				
+				cout << "visiting graph" << endl;
 				sparseGraph.updateVertex(n.getId(), n.level + 1);          // Set level
-				sparseGraph.updateVertex(n.getId(), current);       // Set parent
+				sparseGraph.updateVertex(n.getId(), VertexQueue.front());       // Set parent
 				sparseGraph.updateVertex(n.getId(), "gray");			// Set color visited
-				bfsTree.add(current.getId(), n.getId()); //add the edge to bfsTree
+				bfsTree.add(VertexQueue.front().getId(), n.getId()); //add the edge to bfsTree
 				VertexQueue.push(n);    // Add it to the queue
+				cout << "added to bfsTree" << endl;
 				//cout << n.color << endl;
 				//cout << n.level << endl;			
             }
@@ -66,29 +71,30 @@ Graph Bicc::breadthFirstSearch(Graph& sparseGraph) {
 vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
 
     vector<Graph> components;
-	vector<Edge> graph_edges = graph.getEdges();
-	Graph diffGT = graph.difference(bfsTree);
-	vector<Edge> diffGT_edges = diffGT.getEdges();
-	vector<pair<Vertex, Vertex>> wv;
 	vector<Edge> Bridges;
-
+	
+	/*
 	cout << "isBridge before= " << graph_edges[0].isBridge << endl;
 	graph.updateEdge(graph_edges[0].getU().getId(), graph_edges[0].getV().getId(), false);
 	cout << "isBridge after= " << graph_edges[0].isBridge << endl;
+	*/
 	
 	//compute lca, mark non-bridges
-    for(int i = 0; i < diffGT_edges.size(); i++){
-		Vertex w = diffGT_edges[i].getU();
-		Vertex v = diffGT_edges[i].getV();
+	vector<Edge> graph_edges = graph.getEdges();
+    for(int i = 0; i < graph_edges.size(); i++){
+		Vertex w = graph_edges[i].getU();
+		Vertex v = graph_edges[i].getV();
 		
-		if (w.level > v.level){
-			graph.updateEdge(w.getId(), v.getId(), false);
-			//diffGT_edges[i].setLca(w.parent->getId());
-		}
+		if (bfsTree.contains(w,v) == false){
+			if (w.level > v.level){
+				graph.updateEdge(w.getId(), v.getId(), false);
+				graph_edges[i].setLca(w.parent->getId());
+			}
 		
-		else {
-			//graph.updateEdge(w.getId(), v.getId(), false);
-			//diffGT_edges[i].setLca(v.parent->getId());
+			else {
+				graph.updateEdge(w.getId(), v.getId(), false);
+				graph_edges[i].setLca(v.parent->getId());
+			}
 		}
 	}
 			
@@ -99,25 +105,23 @@ vector<Graph> Bicc::findBridges(Graph& graph, Graph& bfsTree) {
 	}
 	
 	//adding components by removing bridges
-	vector<pair<Vertex, Vertex>> xy;
 	for(int i = 0; i < Bridges.size(); i++) {
-		xy.push_back(make_pair(Bridges[i].getU(), Bridges[i].getV()));
+		Vertex x = Bridges[i].getU(); 
+		Vertex y = Bridges[i].getV();
 		
-			if (xy[i].second.parent != &xy[i].first) {
-				continue;
-				}
-				
-				//components[i].add(xy[i].second);
-				list<Vertex> neighbors = xy[i].second.getNeighbors();
+			if (y.parent == &x) {
+				components[i].add(y.getId());
+				list<Vertex> neighbors = y.getNeighbors();
 				
 				for(auto& neighbor : neighbors){				
-					if(neighbor.parent != &xy[i].second){
-						continue;
+					if(neighbor.parent == &y){
+						components[i].add(neighbor.getId());
 					}
-				//components[i].add(neighbor);
+				}
 			}
 		}
-
+	//testing - debugging
+	cout << "bridges size = " << Bridges.size() << endl;
     return components;
 }
 
@@ -134,7 +138,8 @@ vector<Vertex> Bicc::findArtPointsInParallel(vector<Graph> components, Graph& bf
             }
         }
     }
-
+	//testing - debugging
+	cout << "artPoints size = " << artPoints.size() << endl;
     return artPoints;
 }
 
