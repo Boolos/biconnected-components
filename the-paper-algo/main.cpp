@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	csce::Bicc bicc(nthreads);
 	
 	//using input graph
-	
+	/*
 	int c;
 	while((c = getopt(argc, argv, "f:t:")) != -1){
 		switch(c){
@@ -82,19 +82,16 @@ int main(int argc, char **argv)
 	std::cout << "done in " << duration_string(duration) << std::endl;
 	csce::Graph bfsTree = bicc.breadthFirstSearch(inputGraph);
 	vector<csce::Graph> components = bicc.findBridges(inputGraph, bfsTree);
-	//csce::Graph G_T = inputGraph.difference(bfsTree);
 	std::cout << "There were " << inputGraph.getVertexCount() << " input graph vertices. " << std::endl;
 	std::cout << "There were " << inputGraph.getEdgeCount() << " input graph edges. " << std::endl;
 	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
 	std::cout << "There were " << bfsTree.getEdgeCount() << " bfsTree edges. " << std::endl;
-	//std::cout << "There were " << G_T.getVertexCount() << " inputGraph - bfsTree vertices. " << std::endl;
-	//std::cout << "There were " << G_T.getEdgeCount() << " inputGraph - bfsTree edges. " << std::endl;
 	std::cout << "There were " << components.size() << " components by removing bridges. " << std::endl;
 	std::cout << "There were " << outputArtPoints.size() << " articulation vertices. " << std::endl;
 	std::cout << "-------------------------------------------" << std::endl;
-	
+	*/
 	//using test graph
-	/*
+	
 	    csce::Graph testGraph;
     testGraph.add(0,1).add(0,5).add(0,6)
         .add(1,2).add(1,3).add(1,4).add(1,0)
@@ -140,7 +137,6 @@ int main(int argc, char **argv)
 	std::cout << "done in " << duration_string(duration) << std::endl;
 	csce::Graph bfsTree = bicc.breadthFirstSearch(testGraph);
 	vector<csce::Graph> components = bicc.findBridges(testGraph, bfsTree);
-	csce::Graph G_T = testGraph.difference(bfsTree);
 	std::cout << "There were " << testGraph.getVertexCount() << " inputGraph vertices. " << std::endl;
 	std::cout << "There were " << testGraph.getEdgeCount() << " inputGraph edges. " << std::endl;
 	std::cout << "There were " << bfsTree.getVertexCount() << " bfsTree vertices. " << std::endl;
@@ -156,6 +152,6 @@ int main(int argc, char **argv)
 		else
 			std::cout << "Incorrect" << std::endl;
 	
-	*/
+	
 	return 0;
 }
